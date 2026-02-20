@@ -1,0 +1,33 @@
+# Environment
+.env
+*.env
+
+# Vector database
+chroma_db/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+
+# Corpus files (can be large)
+corpus/raw/*
+corpus/cleaned/*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jane Jacobs Chatbot</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', 'Courier', monospace;
+            background: #f7f3e9;
+            color: #2a2a2a;
+            line-height: 1.6;
+        }
+
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            background:
+                linear-gradient(rgba(0, 0, 0, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 0, 0, 0.02) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+        }
+
+        h1 {
+            font-size: 48px;
+            color: #b8554a;
+            margin-bottom: 8px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            border-bottom: 4px solid #2a2a2a;
+            padding-bottom: 12px;
+        }
+
+        .subtitle {
+            font-size: 18px;
+            color: #5a5a5a;
+            font-style: italic;
+            margin-bottom: 40px;
+            font-family: Georgia, 'Times New Roman', serif;
+        }
+
+        .card {
+            background: white;
+            border: 3px solid #2a2a2a;
+            padding: 32px;
+            margin-bottom: 24px;
+            box-shadow: 8px 8px 0 #ebe5d6;
+        }
+
+        .card h2 {
+            font-size: 24px;
+            color: #2a2a2a;
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .card p {
+            margin-bottom: 16px;
+            font-size: 15px;
+            line-height: 1.8;
+        }
+
+        .highlight {
+            background: #ebe5d6;
+            border-left: 4px solid #b8554a;
+            padding: 20px;
+            margin: 20px 0;
+            font-family: Georgia, 'Times New Roman', serif;
+            font-style: italic;
+        }
+
+        ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        li {
+            padding: 8px 0 8px 24px;
+            position: relative;
+        }
+
+        li::before {
+            content: '▪';
+            position: absolute;
+            left: 0;
+            color: #b8554a;
+            font-size: 20px;
+        }
+
+        code {
+            background: #2a2a2a;
+            color: #f7f3e9;
+            padding: 2px 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+
+        .cta {
+            background: #b8554a;
+            color: #f7f3e9;
+            padding: 16px 32px;
+            border: 3px solid #2a2a2a;
+            font-size: 16px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            box-shadow: 4px 4px 0 #2a2a2a;
+            transition: all 0.2s ease;
+            margin-top: 20px;
+            display: inline-block;
+        }
+
+        .cta:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0 #2a2a2a;
+        }
+
+        .cta:active {
+            transform: translate(4px, 4px);
+            box-shadow: 0 0 0 #2a2a2a;
+        }
+
+        footer {
+            text-align: center;
+            padding: 40px 20px;
+            color: #5a5a5a;
+            font-size: 13px;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 32px;
+            }
+
+            .card {
+                padding: 24px;
+            }
+        }
+    </style>
+
+    <!-- Load the Jane Jacobs Widget -->
+    <link rel="stylesheet" href="jacobs-widget.css">
+    <script src="jacobs-widget.js" data-api-url="http://localhost:8000"></script>
+</head>
+<body>
+    <div class="hero">
+        <div class="container">
+            <h1>Jane Jacobs</h1>
+            <p class="subtitle">(1916 – ) still watching what happens on city streets</p>
+
+            <div class="card">
+                <h2>Ask Jane</h2>
+                <p>
+                    This is a RAG-powered chatbot embodying Jane Jacobs, the legendary urbanist
+                    and author of <em>The Death and Life of Great American Cities</em>.
+                </p>
+                <p>
+                    She responds in her characteristic voice: plain-spoken, direct, deeply observant,
+                    and occasionally sharp. Grounded in her actual writings, she applies her frameworks
+                    to current urban challenges.
+                </p>
+                <div class="highlight">
+                    Click the brick-red city grid icon in the bottom-right corner to start a conversation.
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Try Asking</h2>
+                <ul>
+                    <li>What makes a city safe?</li>
+                    <li>What do you think about remote work killing downtowns?</li>
+                    <li>Are 15-minute cities a real idea or just branding?</li>
+                    <li>Why are mixed-use neighborhoods important?</li>
+                    <li>What would you say to a city planner today?</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h2>Embed on Your Site</h2>
+                <p>Add these two lines before your closing <code>&lt;/body&gt;</code> tag:</p>
+                <pre><code>&lt;link rel="stylesheet" href="jacobs-widget.css"&gt;
+&lt;script src="jacobs-widget.js" data-api-url="YOUR_API_URL"&gt;&lt;/script&gt;</code></pre>
+                <p style="margin-top: 16px; font-size: 13px; color: #5a5a5a;">
+                    That's it. Single-line integration with no dependencies.
+                </p>
+            </div>
+
+            <div class="card">
+                <h2>Technical Stack</h2>
+                <ul>
+                    <li><strong>Backend:</strong> FastAPI + ChromaDB vector database</li>
+                    <li><strong>AI:</strong> Claude Sonnet 4 for persona responses</li>
+                    <li><strong>Embeddings:</strong> OpenAI text-embedding-3-small</li>
+                    <li><strong>Frontend:</strong> Vanilla JavaScript (no frameworks)</li>
+                    <li><strong>Corpus:</strong> 580 chunks from Jane Jacobs' writings</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        Built for urbanists who miss hearing Jane's voice
+    </footer>
+</body>
+</html>
