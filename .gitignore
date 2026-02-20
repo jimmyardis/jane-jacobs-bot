@@ -17,7 +17,9 @@ ENV/
 
 # Corpus files (can be large)
 corpus/raw/*
-corpus/cleaned/*
+
+# Keep cleaned corpus in git for Railway deployment
+# corpus/cleaned/* is now included (only 1.3MB)
 
 # IDE
 .vscode/
