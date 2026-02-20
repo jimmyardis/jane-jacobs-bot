@@ -288,10 +288,22 @@ def main():
 
     # Test query
     print(f"\nTesting database with sample query...")
-    results = collection.query(
-        query_texts=["What makes a city safe?"],
-        n_results=3
-    )
+    try:
+        # Generate query embedding with OpenAI (matching the collection's embedding model)
+        test_query = "What makes a city safe?"
+        response = openai_client.embeddings.create(
+            model="text-embedding-3-small",
+            input=test_query
+        )
+        query_embedding = response.data[0].embedding
+
+        results = collection.query(
+            query_embeddings=[query_embedding],
+            n_results=3
+        )
+    except Exception as e:
+        print(f"⚠ Test query failed: {e}")
+        results = None
 
     if results and results['documents'] and len(results['documents'][0]) > 0:
         print(f"✓ Database working - found {len(results['documents'][0])} relevant chunks")
