@@ -293,7 +293,7 @@ def main():
         n_results=3
     )
 
-    if results and results['documents']:
+    if results and results['documents'] and len(results['documents'][0]) > 0:
         print(f"✓ Database working - found {len(results['documents'][0])} relevant chunks")
         print(f"\nTop result preview:")
         print(f"  Source: {results['metadatas'][0][0].get('title', 'Unknown')}")
