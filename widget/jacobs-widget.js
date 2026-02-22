@@ -1,32 +1,109 @@
 /**
- * Jane Jacobs Chatbot Widget
- * Embeddable chat widget for websites
+ * Historical Figure Chatbot Widget
+ * Embeddable chat widget with persona configuration support
  *
  * Usage:
- * <script src="jacobs-widget.js" data-api-url="http://localhost:8000"></script>
+ * <script src="jacobs-widget.js"
+ *         data-api-url="http://localhost:8000"
+ *         data-persona-id="jane-jacobs"></script>
  */
 
 (function() {
     'use strict';
 
-    // Configuration
+    // Configuration from script tag
     const script = document.currentScript;
     const API_URL = script.getAttribute('data-api-url') || 'http://localhost:8000';
+    const PERSONA_ID = script.getAttribute('data-persona-id') || 'jane-jacobs';
 
     let conversationId = null;
     let isOpen = false;
     let isTyping = false;
+    let personaConfig = null;
 
-    // Conversation starters
-    const STARTERS = [
-        "What do you think about remote work killing downtowns?",
-        "Are 15-minute cities a real idea or just branding?",
-        "What would you say to a city planner today?",
-        "What are cities still getting wrong?"
-    ];
+    // Load persona configuration and initialize widget
+    async function init() {
+        try {
+            personaConfig = await loadPersonaConfig();
+            applyPersonaTheme(personaConfig);
+            createWidget(personaConfig);
+        } catch (error) {
+            console.error('Failed to load persona config:', error);
+            // Fallback to Jane Jacobs defaults if config fails
+            createWidget(getDefaultConfig());
+        }
+    }
 
-    // Create widget HTML
-    function createWidget() {
+    // Fetch persona configuration from API
+    async function loadPersonaConfig() {
+        const response = await fetch(`${API_URL}/persona/${PERSONA_ID}/config`);
+        if (!response.ok) {
+            throw new Error(`Failed to load persona config: ${response.status}`);
+        }
+        const config = await response.json();
+        console.log(`✓ Loaded persona: ${config.metadata.name}`);
+        return config;
+    }
+
+    // Apply persona theme colors as CSS variables
+    function applyPersonaTheme(config) {
+        if (!config.widget.theme) return;
+
+        const root = document.documentElement;
+        const theme = config.widget.theme;
+
+        // Map config keys to CSS variable names
+        const colorMap = {
+            'primary_color': '--persona-primary-color',
+            'cream': '--persona-cream',
+            'charcoal': '--persona-charcoal',
+            'warm_gray': '--persona-warm-gray',
+            'dark_cream': '--persona-dark-cream',
+            'text_gray': '--persona-text-gray'
+        };
+
+        Object.entries(colorMap).forEach(([configKey, cssVar]) => {
+            if (theme[configKey]) {
+                root.style.setProperty(cssVar, theme[configKey]);
+            }
+        });
+
+        // Apply fonts
+        if (theme.font_primary) {
+            root.style.setProperty('--persona-font-primary', theme.font_primary);
+        }
+        if (theme.font_secondary) {
+            root.style.setProperty('--persona-font-secondary', theme.font_secondary);
+        }
+    }
+
+    // Get default config (Jane Jacobs fallback)
+    function getDefaultConfig() {
+        return {
+            metadata: { name: 'Jane Jacobs' },
+            widget: {
+                conversation_starters: [
+                    "What do you think about remote work killing downtowns?",
+                    "Are 15-minute cities a real idea or just branding?",
+                    "What would you say to a city planner today?",
+                    "What are cities still getting wrong?"
+                ],
+                ui: {
+                    header_title: 'Jane Jacobs',
+                    header_subtitle: '(1916 – )',
+                    header_tagline: 'Ask her anything about cities, neighborhoods, or what we keep getting wrong',
+                    input_placeholder: 'Ask Jane a question...',
+                    error_message: 'Sorry, I encountered an error. Please try again.'
+                }
+            }
+        };
+    }
+
+    // Create widget HTML with persona-specific content
+    function createWidget(config) {
+        const ui = config.widget.ui;
+        const starters = config.widget.conversation_starters;
+
         const container = document.createElement('div');
         container.id = 'jane-jacobs-widget';
         container.innerHTML = `
@@ -42,16 +119,16 @@
             <div id="jj-chat-window" class="jj-chat-window jj-hidden">
                 <div class="jj-header">
                     <div class="jj-header-content">
-                        <h3>Jane Jacobs</h3>
-                        <p class="jj-subtitle">(1916 – )</p>
-                        <p class="jj-tagline">Ask her anything about cities, neighborhoods, or what we keep getting wrong</p>
+                        <h3>${ui.header_title}</h3>
+                        <p class="jj-subtitle">${ui.header_subtitle}</p>
+                        <p class="jj-tagline">${ui.header_tagline}</p>
                     </div>
                     <button id="jj-close" class="jj-close-btn">&times;</button>
                 </div>
 
                 <div id="jj-messages" class="jj-messages">
                     <div class="jj-starters">
-                        ${STARTERS.map((starter, i) =>
+                        ${starters.map((starter, i) =>
                             `<button class="jj-starter-btn" data-index="${i}">${starter}</button>`
                         ).join('')}
                     </div>
@@ -62,7 +139,7 @@
                         type="text"
                         id="jj-input"
                         class="jj-input"
-                        placeholder="Ask Jane a question..."
+                        placeholder="${ui.input_placeholder}"
                         disabled
                     />
                     <button id="jj-send" class="jj-send-btn" disabled>
@@ -76,11 +153,11 @@
         `;
 
         document.body.appendChild(container);
-        attachEventListeners();
+        attachEventListeners(config);
     }
 
     // Attach event listeners
-    function attachEventListeners() {
+    function attachEventListeners(config) {
         const trigger = document.getElementById('jj-trigger');
         const closeBtn = document.getElementById('jj-close');
         const sendBtn = document.getElementById('jj-send');
@@ -97,11 +174,13 @@
         });
 
         // Starter buttons
+        const starters = config.widget.conversation_starters;
         document.querySelectorAll('.jj-starter-btn').forEach(btn => {
             btn.addEventListener('click', () => {
-                const starter = STARTERS[parseInt(btn.getAttribute('data-index'))];
-                input.value = starter;
-                sendMessage();
+                const index = parseInt(btn.getAttribute('data-index'));
+                const message = starters[index];
+                hideStarters();
+                sendMessageWithText(message);
             });
         });
     }
@@ -109,55 +188,68 @@
     // Toggle chat window
     function toggleChat() {
         const chatWindow = document.getElementById('jj-chat-window');
-        const input = document.getElementById('jj-input');
-        const sendBtn = document.getElementById('jj-send');
+        const trigger = document.getElementById('jj-trigger');
 
         if (isOpen) {
-            closeChat();
+            chatWindow.classList.add('jj-hidden');
+            trigger.classList.remove('jj-active');
+            isOpen = false;
         } else {
             chatWindow.classList.remove('jj-hidden');
+            trigger.classList.add('jj-active');
             isOpen = true;
-            input.disabled = false;
-            sendBtn.disabled = false;
-            input.focus();
+            enableInput();
         }
     }
 
-    // Close chat
+    // Close chat window
     function closeChat() {
         const chatWindow = document.getElementById('jj-chat-window');
+        const trigger = document.getElementById('jj-trigger');
         chatWindow.classList.add('jj-hidden');
+        trigger.classList.remove('jj-active');
         isOpen = false;
     }
 
-    // Send message
-    async function sendMessage() {
+    // Enable input after initial open
+    function enableInput() {
+        const input = document.getElementById('jj-input');
+        const sendBtn = document.getElementById('jj-send');
+        input.disabled = false;
+        sendBtn.disabled = false;
+        input.focus();
+    }
+
+    // Hide conversation starters
+    function hideStarters() {
+        const starters = document.querySelector('.jj-starters');
+        if (starters) {
+            starters.style.display = 'none';
+        }
+    }
+
+    // Send message (from input)
+    function sendMessage() {
         const input = document.getElementById('jj-input');
         const message = input.value.trim();
 
         if (!message || isTyping) return;
 
-        // Clear starters if this is first message
-        const starters = document.querySelector('.jj-starters');
-        if (starters) {
-            starters.remove();
-        }
-
-        // Add user message
-        addMessage(message, 'user');
+        sendMessageWithText(message);
         input.value = '';
-        input.disabled = true;
+    }
 
-        // Show typing indicator
-        showTyping();
+    // Send message with specific text
+    async function sendMessageWithText(message) {
+        hideStarters();
+        addMessage('user', message);
+
+        isTyping = true;
 
         try {
-            // Call API
             const response = await fetch(`${API_URL}/chat`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     message: message,
                     conversation_id: conversationId
@@ -165,144 +257,89 @@
             });
 
             if (!response.ok) {
-                throw new Error('API request failed');
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
 
             const data = await response.json();
             conversationId = data.conversation_id;
 
-            // Remove typing indicator
-            removeTyping();
-
             // Add assistant response with typewriter effect
-            await addMessageTypewriter(data.response, 'assistant', data.sources);
+            addMessage('assistant', data.response, true);
 
         } catch (error) {
             console.error('Error sending message:', error);
-            removeTyping();
-            addMessage('Sorry, I encountered an error. Please try again.', 'assistant');
+            const errorMsg = personaConfig?.widget?.ui?.error_message ||
+                           'Sorry, I encountered an error. Please try again.';
+            addMessage('assistant', errorMsg);
         } finally {
-            input.disabled = false;
-            input.focus();
+            isTyping = false;
         }
     }
 
     // Add message to chat
-    function addMessage(text, role, sources = null) {
-        const messagesDiv = document.getElementById('jj-messages');
+    function addMessage(role, content, useTypewriter = false) {
+        const messagesContainer = document.getElementById('jj-messages');
+
         const messageDiv = document.createElement('div');
         messageDiv.className = `jj-message jj-message-${role}`;
 
         const contentDiv = document.createElement('div');
         contentDiv.className = 'jj-message-content';
-        contentDiv.textContent = text;
+
+        if (role === 'assistant' && useTypewriter) {
+            // Typewriter effect
+            typewriterEffect(contentDiv, content);
+        } else {
+            contentDiv.textContent = content;
+        }
 
         messageDiv.appendChild(contentDiv);
+        messagesContainer.appendChild(messageDiv);
 
-        // Add sources if available
-        if (sources && sources.length > 0 && role === 'assistant') {
-            const sourcesDiv = document.createElement('div');
-            sourcesDiv.className = 'jj-sources';
-
-            sources.forEach(source => {
-                const sourceSpan = document.createElement('span');
-                sourceSpan.className = 'jj-source';
-                sourceSpan.textContent = `${source.title}, ${source.year}`;
-                sourcesDiv.appendChild(sourceSpan);
-            });
-
-            messageDiv.appendChild(sourcesDiv);
-        }
-
-        messagesDiv.appendChild(messageDiv);
-        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        // Scroll to bottom
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
     }
 
-    // Add message with typewriter effect
-    function addMessageTypewriter(text, role, sources = null) {
-        return new Promise((resolve) => {
-            const messagesDiv = document.getElementById('jj-messages');
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `jj-message jj-message-${role}`;
+    // Typewriter effect with variable speed
+    function typewriterEffect(element, text) {
+        let i = 0;
+        const baseSpeed = 15; // milliseconds per character
 
-            const contentDiv = document.createElement('div');
-            contentDiv.className = 'jj-message-content';
+        function typeChar() {
+            if (i < text.length) {
+                const char = text.charAt(i);
+                element.textContent += char;
 
-            messageDiv.appendChild(contentDiv);
-            messagesDiv.appendChild(messageDiv);
-
-            let i = 0;
-            const baseSpeed = 12; // Base ms per character
-
-            function typeChar() {
-                if (i < text.length) {
-                    const char = text.charAt(i);
-                    contentDiv.textContent += char;
-                    messagesDiv.scrollTop = messagesDiv.scrollHeight;
-                    i++;
-
-                    // Variable speed for more natural typing
-                    let speed = baseSpeed;
-                    if (char === '.' || char === '!' || char === '?') {
-                        speed = baseSpeed * 15; // Pause at end of sentences
-                    } else if (char === ',' || char === ';' || char === ':') {
-                        speed = baseSpeed * 8; // Pause at punctuation
-                    } else if (char === ' ') {
-                        speed = baseSpeed * 1.2; // Slight pause at spaces
-                    } else {
-                        // Random variation for natural feel
-                        speed = baseSpeed + (Math.random() * 8 - 4);
-                    }
-
-                    setTimeout(typeChar, Math.max(speed, 5));
-                } else {
-                    // Add sources after typing completes
-                    if (sources && sources.length > 0) {
-                        const sourcesDiv = document.createElement('div');
-                        sourcesDiv.className = 'jj-sources';
-
-                        sources.forEach(source => {
-                            const sourceSpan = document.createElement('span');
-                            sourceSpan.className = 'jj-source';
-                            sourceSpan.textContent = `${source.title}, ${source.year}`;
-                            sourcesDiv.appendChild(sourceSpan);
-                        });
-
-                        messageDiv.appendChild(sourcesDiv);
-                    }
-                    resolve();
+                // Variable speed based on punctuation
+                let speed = baseSpeed;
+                if (char === '.' || char === '!' || char === '?') {
+                    speed = baseSpeed * 15; // Long pause at sentence end
+                } else if (char === ',' || char === ';' || char === ':') {
+                    speed = baseSpeed * 8; // Medium pause at punctuation
+                } else if (char === '\n') {
+                    speed = baseSpeed * 10; // Pause at line breaks
                 }
+
+                // Add slight randomness for natural feel
+                speed *= (0.8 + Math.random() * 0.4);
+
+                i++;
+
+                // Auto-scroll as text appears
+                const messagesContainer = document.getElementById('jj-messages');
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+                setTimeout(typeChar, speed);
             }
-
-            typeChar();
-        });
-    }
-
-    // Show typing indicator
-    function showTyping() {
-        isTyping = true;
-        const messagesDiv = document.getElementById('jj-messages');
-        const typingDiv = document.createElement('div');
-        typingDiv.id = 'jj-typing';
-        typingDiv.className = 'jj-message jj-message-assistant';
-        typingDiv.innerHTML = '<div class="jj-typing-indicator"><span></span><span></span><span></span></div>';
-        messagesDiv.appendChild(typingDiv);
-        messagesDiv.scrollTop = messagesDiv.scrollHeight;
-    }
-
-    // Remove typing indicator
-    function removeTyping() {
-        isTyping = false;
-        const typingDiv = document.getElementById('jj-typing');
-        if (typingDiv) {
-            typingDiv.remove();
         }
+
+        typeChar();
     }
 
     // Initialize widget when DOM is ready
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', createWidget);
+        document.addEventListener('DOMContentLoaded', init);
     } else {
-        createWidget();
+        init();
     }
 })();

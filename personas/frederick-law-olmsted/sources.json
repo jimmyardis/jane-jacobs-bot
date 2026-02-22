@@ -1,0 +1,43 @@
+{
+  "downloader": "internet_archive",
+  "priority_1": [
+    {
+      "title": "A Journey in the Seaboard Slave States",
+      "author": "Frederick Law Olmsted",
+      "year": 1856,
+      "search_terms": "journey seaboard slave states olmsted"
+    },
+    {
+      "title": "Walks and Talks of an American Farmer in England",
+      "author": "Frederick Law Olmsted",
+      "year": 1852,
+      "search_terms": "walks talks american farmer england olmsted"
+    },
+    {
+      "title": "Public Parks and the Enlargement of Towns",
+      "author": "Frederick Law Olmsted",
+      "year": 1870,
+      "search_terms": "public parks enlargement towns olmsted 1870"
+    },
+    {
+      "title": "Forty Years of Landscape Architecture: Central Park",
+      "author": "Frederick Law Olmsted Jr.",
+      "year": 1928,
+      "search_terms": "forty years landscape architecture central park olmsted"
+    }
+  ],
+  "priority_2": [
+    {
+      "title": "The Papers of Frederick Law Olmsted Volume 3",
+      "author": "Frederick Law Olmsted",
+      "year": 1983,
+      "search_terms": "papers frederick law olmsted volume"
+    },
+    {
+      "title": "Civilizing American Cities: Writings on City Landscapes",
+      "author": "Frederick Law Olmsted",
+      "year": 1997,
+      "search_terms": "civilizing american cities olmsted writings"
+    }
+  ]
+}

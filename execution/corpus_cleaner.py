@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 """
-Corpus Cleaner for Jane Jacobs Chatbot
+Corpus Cleaner for Historical Figure Chatbot Template
 Extracts and cleans text from PDFs, plain text files, and DOCX files.
 """
 
 import os
 import re
 import json
+import argparse
 from pathlib import Path
 from typing import Dict, List, Optional
 
@@ -16,6 +17,7 @@ except ImportError:
     from PyPDF2 import PdfReader
 
 from docx import Document
+from persona_manager import PersonaManager
 
 
 def clean_text(text: str) -> str:
@@ -183,17 +185,30 @@ def process_file(file_path: Path, output_dir: Path) -> Optional[Dict]:
     }
 
 
-def main():
-    """Main execution function."""
-    # Set up directories
-    script_dir = Path(__file__).parent
-    project_root = script_dir.parent
-    corpus_raw = project_root / "corpus" / "raw"
-    corpus_cleaned = project_root / "corpus" / "cleaned"
+def main(persona_id: str = "jane-jacobs"):
+    """
+    Main execution function.
+
+    Args:
+        persona_id: Persona identifier (e.g., 'jane-jacobs')
+    """
+    # Load persona configuration
+    print(f"Loading persona: {persona_id}")
+    try:
+        persona_config = PersonaManager.load_persona(persona_id)
+        print(f"✓ Loaded persona: {persona_config['metadata']['name']}\n")
+    except Exception as e:
+        print(f"✗ Error loading persona config: {e}")
+        return
+
+    # Set up directories from persona config
+    corpus_paths = PersonaManager.get_corpus_paths(persona_config)
+    corpus_raw = corpus_paths['raw']
+    corpus_cleaned = corpus_paths['cleaned']
 
     corpus_cleaned.mkdir(parents=True, exist_ok=True)
 
-    print("Jane Jacobs Corpus Cleaner")
+    print(f"{persona_config['metadata']['name']} Corpus Cleaner")
     print("=" * 60)
     print(f"Input directory:  {corpus_raw}")
     print(f"Output directory: {corpus_cleaned}")
@@ -260,4 +275,14 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(
+        description="Clean corpus text files for historical figure chatbot"
+    )
+    parser.add_argument(
+        "--persona",
+        default="jane-jacobs",
+        help="Persona ID to process (default: jane-jacobs)"
+    )
+    args = parser.parse_args()
+
+    main(persona_id=args.persona)
