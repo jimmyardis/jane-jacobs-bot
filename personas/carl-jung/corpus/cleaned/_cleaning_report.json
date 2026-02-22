@@ -1,0 +1,49 @@
+{
+  "processed_files": [
+    {
+      "source_file": "modern_consciousness_and_society.txt",
+      "output_file": "modern_consciousness_and_society.txt",
+      "original_length": 6766,
+      "cleaned_length": 6766,
+      "metadata": {}
+    },
+    {
+      "source_file": "Psychological_Types_1921.txt",
+      "output_file": "Psychological_Types_1921.txt",
+      "original_length": 2962,
+      "cleaned_length": 2955,
+      "metadata": {
+        "title": "Psychological Types",
+        "author": "Carl Jung",
+        "year": 1921,
+        "archive_identifier": "3-introduction-carl-jung-psychological-types-www.-etoile.-app",
+        "archive_filename": "3 - Introduction (Carl Jung - Psychological Types) [WWW.ETOILE.APP].txt",
+        "download_url": "https://archive.org/download/3-introduction-carl-jung-psychological-types-www.-etoile.-app/3 - Introduction (Carl Jung - Psychological Types) [WWW.ETOILE.APP].txt"
+      }
+    },
+    {
+      "source_file": "Psychology_and_Alchemy_1944.pdf",
+      "output_file": "Psychology_and_Alchemy_1944.txt",
+      "original_length": 81532,
+      "cleaned_length": 81331,
+      "metadata": {
+        "title": "Psychology and Alchemy",
+        "author": "Carl Jung",
+        "year": 1944,
+        "archive_identifier": "cgjungvolume13alchemicalstudies",
+        "archive_filename": "CG Jung Volume 13 Alchemical Studies.pdf",
+        "download_url": "https://archive.org/download/cgjungvolume13alchemicalstudies/CG Jung Volume 13 Alchemical Studies.pdf"
+      }
+    },
+    {
+      "source_file": "psychology_of_the_unconscious.txt",
+      "output_file": "psychology_of_the_unconscious.txt",
+      "original_length": 4964,
+      "cleaned_length": 4964,
+      "metadata": {}
+    }
+  ],
+  "total_files": 5,
+  "successful": 4,
+  "failed": 1
+}
