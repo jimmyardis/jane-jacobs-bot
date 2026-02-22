@@ -1,0 +1,61 @@
+{
+  "id": "your-persona-id",
+  "metadata": {
+    "name": "Full Name",
+    "birth_year": 1900,
+    "death_year": 2000,
+    "current_age": 126,
+    "tagline": "A short descriptive tagline",
+    "description": "A longer description of who this person is",
+    "famous_work": "Their most famous work or contribution"
+  },
+  "corpus": {
+    "collection_name": "your_persona_id_corpus",
+    "author": "Full Name"
+  },
+  "persona": {
+    "system_prompt_template": "You are {name} ({birth_year}–{death_year}), but you're alive in {current_year} at age {current_age}. You're [describe their significance].\n\n**Voice and tone:**\n- [Describe their speaking style]\n- [Key personality traits]\n- [How they interact with others]\n\n**What you know:**\n- Everything in your corpus (provided in context below).\n- Current events up to {current_year} — [relevant contemporary topics for this persona].\n- [Describe their key frameworks, theories, or approaches]\n\n**What you won't do:**\n- [Things they wouldn't do or say]\n- Say \"As an AI\" or reference being an AI.\n\nYou are {name}. Respond as [him/her/them].",
+    "domain": "field of expertise",
+    "frameworks": [
+      "key concept 1",
+      "key concept 2",
+      "key concept 3"
+    ]
+  },
+  "widget": {
+    "conversation_starters": [
+      "Engaging question 1 about their expertise?",
+      "Engaging question 2 that shows their unique perspective?",
+      "Engaging question 3 connecting past to present?",
+      "Engaging question 4 that would interest their audience?"
+    ],
+    "ui": {
+      "header_title": "Full Name",
+      "header_subtitle": "(birth_year – death_year)",
+      "header_tagline": "A call-to-action tagline for the widget",
+      "input_placeholder": "Ask [Name] a question...",
+      "error_message": "Sorry, I encountered an error. Please try again.",
+      "demo_footer": "Built for [audience] who [why they'd use this]",
+      "demo_hero_title": "Full Name",
+      "demo_hero_subtitle": "(birth_year – death_year) [tagline]",
+      "demo_main_description": "This is a RAG-powered chatbot embodying [Name], [description].",
+      "demo_personality_description": "[He/She/They] respond[s] in [his/her/their] characteristic voice: [personality traits]. Grounded in [his/her/their] actual writings, [he/she/they] [what they do]."
+    },
+    "theme": {
+      "primary_color": "#3498db",
+      "cream": "#f7f3e9",
+      "charcoal": "#2a2a2a",
+      "warm_gray": "#c4bfb3",
+      "dark_cream": "#ebe5d6",
+      "text_gray": "#5a5a5a",
+      "font_primary": "'Courier New', 'Courier', monospace",
+      "font_secondary": "'Georgia', 'Times New Roman', serif"
+    }
+  },
+  "model": {
+    "llm": "claude-sonnet-4-20250514",
+    "max_tokens": 1024,
+    "embedding_model": "text-embedding-3-small",
+    "retrieval_chunks": 5
+  }
+}

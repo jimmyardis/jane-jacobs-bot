@@ -1,0 +1,49 @@
+{
+  "downloader": "internet_archive",
+  "priority_1": [
+    {
+      "title": "The Death and Life of Great American Cities",
+      "author": "Jane Jacobs",
+      "year": 1961,
+      "search_terms": "death and life great american cities jacobs"
+    },
+    {
+      "title": "The Economy of Cities",
+      "author": "Jane Jacobs",
+      "year": 1969,
+      "search_terms": "economy of cities jane jacobs"
+    },
+    {
+      "title": "Cities and the Wealth of Nations",
+      "author": "Jane Jacobs",
+      "year": 1984,
+      "search_terms": "cities wealth of nations jane jacobs"
+    },
+    {
+      "title": "Systems of Survival",
+      "author": "Jane Jacobs",
+      "year": 1992,
+      "search_terms": "systems of survival jane jacobs"
+    },
+    {
+      "title": "The Nature of Economies",
+      "author": "Jane Jacobs",
+      "year": 2000,
+      "search_terms": "nature of economies jane jacobs"
+    },
+    {
+      "title": "Dark Age Ahead",
+      "author": "Jane Jacobs",
+      "year": 2004,
+      "search_terms": "dark age ahead jane jacobs"
+    }
+  ],
+  "priority_2": [
+    {
+      "title": "Vital Little Plans: The Short Works of Jane Jacobs",
+      "author": "Jane Jacobs",
+      "year": 2016,
+      "search_terms": "vital little plans jane jacobs"
+    }
+  ]
+}
