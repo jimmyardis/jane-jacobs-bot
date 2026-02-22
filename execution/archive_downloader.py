@@ -1,15 +1,18 @@
 #!/usr/bin/env python3
 """
-Archive.org Corpus Downloader for Jane Jacobs Chatbot
-Downloads Priority 1 & 2 books from Internet Archive.
+Archive.org Corpus Downloader for Historical Figure Chatbot Template
+Downloads books from Internet Archive based on persona sources.json.
 """
 
 import os
 import sys
 import json
+import argparse
 import requests
 from pathlib import Path
 from typing import Dict, List, Optional
+
+from persona_manager import PersonaManager
 
 # Internet Archive search and download endpoints
 SEARCH_URL = "https://archive.org/advancedsearch.php"
@@ -203,20 +206,41 @@ def download_book(book_info: Dict, output_dir: Path) -> bool:
     return success
 
 
-def main():
-    """Main execution function."""
-    # Set up output directory
-    script_dir = Path(__file__).parent
-    project_root = script_dir.parent
-    corpus_raw = project_root / "corpus" / "raw"
+def main(persona_id: str = "jane-jacobs"):
+    """
+    Main execution function.
+
+    Args:
+        persona_id: Persona identifier (e.g., 'jane-jacobs')
+    """
+    # Load persona configuration
+    print(f"Loading persona: {persona_id}")
+    try:
+        persona_config = PersonaManager.load_persona(persona_id)
+        print(f"✓ Loaded persona: {persona_config['metadata']['name']}\n")
+    except Exception as e:
+        print(f"✗ Error loading persona config: {e}")
+        return
+
+    # Load sources configuration
+    sources = PersonaManager.get_sources_config(persona_id)
+    if not sources:
+        print(f"✗ No sources.json found for persona '{persona_id}'")
+        print(f"  Create personas/{persona_id}/sources.json first")
+        return
+
+    # Set up output directory from persona config
+    corpus_paths = PersonaManager.get_corpus_paths(persona_config)
+    corpus_raw = corpus_paths['raw']
     corpus_raw.mkdir(parents=True, exist_ok=True)
 
-    print("Jane Jacobs Corpus Downloader")
+    print(f"{persona_config['metadata']['name']} Corpus Downloader")
     print("=" * 60)
     print(f"Output directory: {corpus_raw}")
     print()
 
-    all_books = PRIORITY_1 + PRIORITY_2
+    # Load books from sources.json
+    all_books = sources.get('priority_1', []) + sources.get('priority_2', [])
     successful = 0
     failed = 0
 
@@ -249,4 +273,14 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(
+        description="Download corpus from Archive.org for historical figure chatbot"
+    )
+    parser.add_argument(
+        "--persona",
+        default="jane-jacobs",
+        help="Persona ID to download corpus for (default: jane-jacobs)"
+    )
+    args = parser.parse_args()
+
+    main(persona_id=args.persona)

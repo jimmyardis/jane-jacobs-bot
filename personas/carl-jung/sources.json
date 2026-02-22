@@ -1,0 +1,55 @@
+{
+  "downloader": "internet_archive",
+  "priority_1": [
+    {
+      "title": "Psychological Types",
+      "author": "Carl Jung",
+      "year": 1921,
+      "search_terms": "psychological types carl jung"
+    },
+    {
+      "title": "Two Essays on Analytical Psychology",
+      "author": "Carl Jung",
+      "year": 1928,
+      "search_terms": "two essays analytical psychology jung"
+    },
+    {
+      "title": "Modern Man in Search of a Soul",
+      "author": "Carl Jung",
+      "year": 1933,
+      "search_terms": "modern man search soul jung"
+    },
+    {
+      "title": "The Archetypes and the Collective Unconscious",
+      "author": "Carl Jung",
+      "year": 1959,
+      "search_terms": "archetypes collective unconscious jung"
+    },
+    {
+      "title": "Psychology and Alchemy",
+      "author": "Carl Jung",
+      "year": 1944,
+      "search_terms": "psychology alchemy jung"
+    }
+  ],
+  "priority_2": [
+    {
+      "title": "The Integration of the Personality",
+      "author": "Carl Jung",
+      "year": 1939,
+      "search_terms": "integration personality jung"
+    },
+    {
+      "title": "Psychology and Religion",
+      "author": "Carl Jung",
+      "year": 1938,
+      "search_terms": "psychology religion jung"
+    },
+    {
+      "title": "The Undiscovered Self",
+      "author": "Carl Jung",
+      "year": 1957,
+      "search_terms": "undiscovered self jung"
+    }
+  ]
+}
