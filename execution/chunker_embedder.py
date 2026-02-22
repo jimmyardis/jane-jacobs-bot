@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 """
-Chunker & Embedder for Jane Jacobs Chatbot
+Chunker & Embedder for Historical Figure Chatbot Template
 Chunks cleaned corpus text, generates embeddings, and loads into ChromaDB.
 """
 
 import os
 import json
 import sys
+import argparse
 from pathlib import Path
 from typing import List, Dict
 from dotenv import load_dotenv
@@ -14,6 +15,8 @@ from dotenv import load_dotenv
 import chromadb
 from chromadb.config import Settings
 from openai import OpenAI
+
+from persona_manager import PersonaManager
 
 
 def load_cleaned_texts(cleaned_dir: Path) -> List[Dict]:
@@ -147,10 +150,24 @@ def create_embeddings_batch(texts: List[str], client: OpenAI, model: str = "text
         return []
 
 
-def main():
-    """Main execution function."""
+def main(persona_id: str = "jane-jacobs"):
+    """
+    Main execution function.
+
+    Args:
+        persona_id: Persona identifier (e.g., 'jane-jacobs')
+    """
     # Load environment variables
     load_dotenv()
+
+    # Load persona configuration
+    print(f"Loading persona: {persona_id}")
+    try:
+        persona_config = PersonaManager.load_persona(persona_id)
+        print(f"✓ Loaded persona: {persona_config['metadata']['name']}\n")
+    except Exception as e:
+        print(f"✗ Error loading persona config: {e}")
+        sys.exit(1)
 
     openai_api_key = os.getenv("OPENAI_API_KEY")
     if not openai_api_key:
@@ -161,15 +178,16 @@ def main():
     # Initialize OpenAI client
     openai_client = OpenAI(api_key=openai_api_key)
 
-    # Set up directories
+    # Set up directories from persona config
     script_dir = Path(__file__).parent
     project_root = script_dir.parent
-    corpus_cleaned = project_root / "corpus" / "cleaned"
+    corpus_paths = PersonaManager.get_corpus_paths(persona_config)
+    corpus_cleaned = corpus_paths['cleaned']
     chroma_db_dir = project_root / "chroma_db"
 
     chroma_db_dir.mkdir(parents=True, exist_ok=True)
 
-    print("Jane Jacobs Chunker & Embedder")
+    print(f"{persona_config['metadata']['name']} Chunker & Embedder")
     print("=" * 60)
     print(f"Source directory: {corpus_cleaned}")
     print(f"ChromaDB directory: {chroma_db_dir}")
@@ -181,7 +199,7 @@ def main():
 
     if not texts:
         print("✗ No cleaned texts found")
-        print(f"  Run corpus_cleaner.py first")
+        print(f"  Run corpus_cleaner.py --persona {persona_id} first")
         sys.exit(1)
 
     print(f"✓ Loaded {len(texts)} text file(s)\n")
@@ -194,7 +212,7 @@ def main():
     )
 
     # Get or create collection
-    collection_name = "jane_jacobs_corpus"
+    collection_name = PersonaManager.get_collection_name(persona_config)
 
     try:
         # Try to delete existing collection
@@ -205,7 +223,7 @@ def main():
 
     collection = chroma_client.create_collection(
         name=collection_name,
-        metadata={"description": "Jane Jacobs writings corpus"}
+        metadata={"description": f"{persona_config['metadata']['name']} writings corpus"}
     )
     print(f"✓ Created collection: {collection_name}\n")
 
@@ -224,7 +242,7 @@ def main():
 
         # Extract metadata
         title = metadata.get('title', filename.replace('.txt', ''))
-        author = metadata.get('author', 'Jane Jacobs')
+        author = metadata.get('author', persona_config['corpus']['author'])
         year = metadata.get('year', 'Unknown')
 
         print(f"  Title: {title}")
@@ -315,4 +333,14 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(
+        description="Chunk and embed corpus for historical figure chatbot"
+    )
+    parser.add_argument(
+        "--persona",
+        default="jane-jacobs",
+        help="Persona ID to process (default: jane-jacobs)"
+    )
+    args = parser.parse_args()
+
+    main(persona_id=args.persona)

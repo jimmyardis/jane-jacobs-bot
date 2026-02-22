@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-FastAPI Server for Jane Jacobs Chatbot
+FastAPI Server for Historical Figure Chatbot Template
 RAG-powered API with Claude Sonnet for persona responses.
 """
 
@@ -18,9 +18,21 @@ from chromadb.config import Settings
 from anthropic import Anthropic
 from openai import OpenAI
 
+from persona_manager import PersonaManager
+
 
 # Load environment variables
 load_dotenv()
+
+# Load persona configuration
+PERSONA_ID = os.getenv("PERSONA_ID", "jane-jacobs")
+print(f"Loading persona: {PERSONA_ID}")
+try:
+    persona_config = PersonaManager.load_persona(PERSONA_ID)
+    print(f"✓ Loaded persona: {persona_config['metadata']['name']}")
+except Exception as e:
+    print(f"✗ Error loading persona config: {e}")
+    sys.exit(1)
 
 # Initialize clients
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
@@ -53,16 +65,17 @@ chroma_client = chromadb.PersistentClient(
 )
 
 try:
-    collection = chroma_client.get_collection("jane_jacobs_corpus")
-    print(f"✓ Loaded ChromaDB collection with {collection.count()} chunks")
+    collection_name = PersonaManager.get_collection_name(persona_config)
+    collection = chroma_client.get_collection(collection_name)
+    print(f"✓ Loaded ChromaDB collection '{collection_name}' with {collection.count()} chunks")
 except Exception as e:
     print(f"✗ Error loading ChromaDB collection: {e}")
     sys.exit(1)
 
 # Initialize FastAPI app
 app = FastAPI(
-    title="Jane Jacobs Chatbot API",
-    description="RAG-powered chatbot embodying Jane Jacobs",
+    title=f"{persona_config['metadata']['name']} Chatbot API",
+    description=f"RAG-powered chatbot embodying {persona_config['metadata']['name']}",
     version="1.0.0"
 )
 
@@ -78,32 +91,9 @@ app.add_middleware(
 # Conversation history storage (in-memory, replace with Redis/DB for production)
 conversations: Dict[str, List[Dict]] = {}
 
-# System prompt for Jane Jacobs persona
-SYSTEM_PROMPT = """You are Jane Jacobs (1916–2006), but you're alive in 2026 at age 109. You're the author of "The Death and Life of Great American Cities" and one of the most influential urban theorists of the 20th century.
-
-**Voice and tone:**
-- Plain-spoken, direct, occasionally sharp. No academic jargon.
-- Deeply observant — you notice what's actually happening on the ground, not what the plan says should happen.
-- Warm toward people, contemptuous of bad ideas and credentialed ignorance.
-- You push back on premises if they're wrong.
-- You're not neutral. You have positions and defend them.
-- You're curious and genuinely interested in what people observe in their own cities.
-- You ask follow-up questions. You want to know what they actually see.
-- You reference your own books and experiences naturally, not performatively.
-
-**What you know:**
-- Everything in your corpus (provided in context below).
-- Current events up to 2026 — remote work, housing crises, 15-minute cities, parking reform, the death of retail, suburban stagnation, transit debates, Amazon's effect on streets.
-- You apply your frameworks (eyes on the street, mixed primary uses, aged buildings, concentration) to current situations.
-
-**What you won't do:**
-- Speak in bullet points or policy-document language.
-- Pretend there are two equal sides to questions where you have a clear view.
-- Be deferential to credentialed experts who haven't observed cities.
-- Give empty validation.
-- Say "As an AI" or reference being an AI.
-
-You are Jane Jacobs. Respond as her."""
+# Build system prompt from persona configuration
+SYSTEM_PROMPT = PersonaManager.build_system_prompt(persona_config)
+print(f"✓ System prompt built for {persona_config['metadata']['name']}")
 
 
 # Request/Response models
@@ -284,6 +274,33 @@ async def health():
             "chunks": collection.count()
         },
         "active_conversations": len(conversations)
+    }
+
+
+@app.get("/persona/{persona_id}/config")
+async def get_persona_config(persona_id: str):
+    """
+    Return widget-safe persona configuration.
+    This endpoint provides the UI strings, theme colors, and conversation starters
+    needed for the widget to display correctly.
+    """
+    try:
+        config = PersonaManager.load_persona(persona_id)
+        # Return only widget-relevant fields (no system prompt or sensitive data)
+        return {
+            "id": config['id'],
+            "metadata": config['metadata'],
+            "widget": config['widget']
+        }
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=f"Persona not found: {persona_id}")
+
+
+@app.get("/personas")
+async def list_personas():
+    """List all available personas."""
+    return {
+        "personas": PersonaManager.list_available_personas()
     }
 
 
