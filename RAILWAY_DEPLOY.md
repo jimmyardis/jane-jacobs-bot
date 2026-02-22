@@ -1,6 +1,10 @@
 # Railway Deployment Guide
 
-Deploy your Jane Jacobs chatbot to Railway for public API access.
+Deploy your Historical Figure Chatbot to Railway for public API access.
+
+## Persona Configuration
+
+This template supports deploying any historical figure persona. The active persona is controlled by the `PERSONA_ID` environment variable.
 
 ## Prerequisites
 
@@ -44,9 +48,16 @@ In Railway project settings, add these variables:
 ```
 ANTHROPIC_API_KEY=your_anthropic_key_here
 OPENAI_API_KEY=your_openai_key_here
+PERSONA_ID=jane-jacobs
 HOST=0.0.0.0
 PORT=8000
 ```
+
+**Persona Selection:**
+- `PERSONA_ID` determines which persona to deploy (default: `jane-jacobs`)
+- Must match a directory name in `personas/`
+- Examples: `jane-jacobs`, `frederick-law-olmsted`, `ada-lovelace`
+- One deployment = one persona (see Multi-Persona section for advanced setup)
 
 ### 4. Add Build Command
 
@@ -191,6 +202,69 @@ restartPolicyType = "ON_FAILURE"
 
 Then share your repo as a Railway template.
 
+## Deploying a Custom Persona
+
+To deploy your own historical figure:
+
+### 1. Create Persona Configuration
+
+```bash
+# Locally, create your persona
+cp personas/template.json personas/your-figure-id/persona.json
+# Edit persona.json with all config
+# Add corpus files to personas/your-figure-id/corpus/raw/
+```
+
+### 2. Build Corpus Locally (Recommended)
+
+```bash
+# Process corpus locally first
+python execution/corpus_cleaner.py --persona your-figure-id
+python execution/chunker_embedder.py --persona your-figure-id
+```
+
+This avoids embedding costs on each Railway deployment.
+
+### 3. Commit to Git
+
+```bash
+git add personas/your-figure-id/
+git commit -m "Add [Name] persona"
+git push origin main
+```
+
+### 4. Update Railway Environment
+
+In Railway Variables:
+- Change `PERSONA_ID` to `your-figure-id`
+- Railway auto-redeploys with new persona
+
+### 5. Update Widget
+
+```html
+<script src="widget.js"
+        data-api-url="https://your-app.up.railway.app"
+        data-persona-id="your-figure-id"></script>
+```
+
+## Multi-Persona Deployment (Advanced)
+
+To serve multiple personas from one deployment:
+
+1. **Include all persona directories** in git
+2. **Build all ChromaDB collections** locally:
+   ```bash
+   python execution/chunker_embedder.py --persona jane-jacobs
+   python execution/chunker_embedder.py --persona frederick-law-olmsted
+   ```
+3. **Commit chroma_db/** to git (skip .gitignore)
+4. **Remove PERSONA_ID** from Railway (API will error if set)
+5. **Use persona-specific endpoints:**
+   - Widget: `data-persona-id="jane-jacobs"`
+   - API: Uses persona from widget, looks up correct collection
+
+**Note:** Multi-persona requires more memory (~500MB per persona). Ensure Railway plan supports it.
+
 ## Next Steps
 
 After deployment:
@@ -198,5 +272,6 @@ After deployment:
 2. Monitor Railway usage/costs
 3. Set up custom domain (optional)
 4. Add analytics (optional)
+5. Create additional personas (see `personas/README.md`)
 
-Your Jane Jacobs chatbot is now live! 🚂
+Your historical figure chatbot is now live! 🚂
