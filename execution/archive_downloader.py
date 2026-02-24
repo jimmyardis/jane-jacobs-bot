@@ -245,6 +245,9 @@ def main(persona_id: str = "jane-jacobs"):
     failed = 0
 
     for book in all_books:
+        if book.get('source', 'archive') != 'archive':
+            print(f"  Skipping non-archive entry: {book.get('title', 'unknown')} (source: {book.get('source')})")
+            continue
         try:
             if download_book(book, corpus_raw):
                 successful += 1

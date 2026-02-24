@@ -1,0 +1,31 @@
+{
+  "downloader": "auto",
+  "_comment": "Copy this to personas/your-persona-id/sources.json and edit. Run: python execution/download_corpus.py --persona your-persona-id",
+  "priority_1": [
+    {
+      "title": "Famous Book Title",
+      "author": "Author Name",
+      "year": 1900,
+      "source": "gutenberg",
+      "gutenberg_id": 23,
+      "_comment": "Find the ID in the URL: gutenberg.org/ebooks/23 → ID is 23. Best for pre-1928 US works (clean plain text, no OCR)."
+    },
+    {
+      "title": "Another Famous Book",
+      "author": "Author Name",
+      "year": 1950,
+      "source": "archive",
+      "search_terms": "famous book title author name",
+      "_comment": "Internet Archive: good for 20th century works. search_terms is sent to archive.org search."
+    }
+  ],
+  "priority_2": [
+    {
+      "title": "Hard to Find Work",
+      "author": "Author Name",
+      "year": 1975,
+      "source": "manual",
+      "_comment": "Manual: place the file yourself in corpus/raw/. Neither downloader will touch this entry."
+    }
+  ]
+}

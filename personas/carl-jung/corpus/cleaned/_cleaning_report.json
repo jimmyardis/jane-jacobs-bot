@@ -1,11 +1,17 @@
 {
   "processed_files": [
     {
-      "source_file": "modern_consciousness_and_society.txt",
-      "output_file": "modern_consciousness_and_society.txt",
-      "original_length": 6766,
-      "cleaned_length": 6766,
-      "metadata": {}
+      "source_file": "Narrative_of_the_Life_of_Frederick_Douglass_1845.txt",
+      "output_file": "Narrative_of_the_Life_of_Frederick_Douglass_1845.txt",
+      "original_length": 243451,
+      "cleaned_length": 243084,
+      "metadata": {
+        "title": "Narrative of the Life of Frederick Douglass",
+        "author": "Frederick Douglass",
+        "year": 1845,
+        "gutenberg_id": 23,
+        "download_url": "https://www.gutenberg.org/cache/epub/23/pg23.txt"
+      }
     },
     {
       "source_file": "Psychological_Types_1921.txt",
@@ -36,6 +42,13 @@
       }
     },
     {
+      "source_file": "modern_consciousness_and_society.txt",
+      "output_file": "modern_consciousness_and_society.txt",
+      "original_length": 6766,
+      "cleaned_length": 6766,
+      "metadata": {}
+    },
+    {
       "source_file": "psychology_of_the_unconscious.txt",
       "output_file": "psychology_of_the_unconscious.txt",
       "original_length": 4964,
@@ -43,7 +56,7 @@
       "metadata": {}
     }
   ],
-  "total_files": 5,
-  "successful": 4,
+  "total_files": 6,
+  "successful": 5,
   "failed": 1
 }

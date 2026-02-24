@@ -15,8 +15,8 @@ To create a new historical figure chatbot:
 
 3. **Create sources.json** for corpus acquisition
    ```bash
-   cp personas/jane-jacobs/sources.json personas/your-figure-id/sources.json
-   # Edit to list your figure's works
+   cp personas/template_sources.json personas/your-figure-id/sources.json
+   # Edit to list your figure's works (supports archive, gutenberg, and manual sources)
    ```
 
 4. **Add corpus files** to `personas/your-figure-id/corpus/raw/`
@@ -24,8 +24,11 @@ To create a new historical figure chatbot:
    - Transcripts of speeches or interviews
    - Letters, essays, or compiled works
 
-5. **Run the corpus pipeline**
+5. **Download and process the corpus**
    ```bash
+   # Download from all sources (Archive.org + Gutenberg) in one command
+   python execution/download_corpus.py --persona your-figure-id
+   # Then clean and embed
    python execution/corpus_cleaner.py --persona your-figure-id
    python execution/chunker_embedder.py --persona your-figure-id
    ```
@@ -137,6 +140,22 @@ You are {name}. Respond as [him/her/them].
 
 ## Corpus Sourcing Strategies
 
+### The `source` Field
+
+Each entry in `sources.json` has an optional `source` field that controls which downloader processes it:
+
+| Value | Downloader | When to use |
+|-------|-----------|-------------|
+| `"archive"` (default) | `archive_downloader.py` | 20th century works, uses search query |
+| `"gutenberg"` | `gutenberg_downloader.py` | Pre-1928 US works, requires `gutenberg_id` |
+| `"manual"` | (none) | Copyrighted/hard-to-find texts you place yourself |
+
+Entries without a `source` field default to `"archive"` for backwards compatibility.
+
+Use `python execution/download_corpus.py --persona your-id` to run both downloaders at once.
+
+---
+
 ### Option 1: Internet Archive (Public Domain)
 
 For figures whose works are in the public domain:
@@ -161,7 +180,40 @@ For figures whose works are in the public domain:
    python execution/archive_downloader.py --persona your-figure-id
    ```
 
-### Option 2: Manual Files
+### Option 2: Project Gutenberg (Public Domain)
+
+Project Gutenberg has clean, plain-text versions of 70,000+ public domain works — ideal for pre-1928 figures because there's no OCR noise.
+
+**Finding a Gutenberg ID:**
+1. Go to [gutenberg.org](https://www.gutenberg.org) and search for the book
+2. The ID is the number in the URL: `gutenberg.org/ebooks/23` → ID is `23`
+
+1. Add entries with `"source": "gutenberg"` and `"gutenberg_id"` to `sources.json`:
+   ```json
+   {
+     "downloader": "auto",
+     "priority_1": [
+       {
+         "title": "Narrative of the Life of Frederick Douglass",
+         "author": "Frederick Douglass",
+         "year": 1845,
+         "source": "gutenberg",
+         "gutenberg_id": 23
+       }
+     ]
+   }
+   ```
+
+2. Run the Gutenberg downloader (or the master script):
+   ```bash
+   python execution/gutenberg_downloader.py --persona your-figure-id
+   # or download everything at once:
+   python execution/download_corpus.py --persona your-figure-id
+   ```
+
+**Note:** The downloader tries three URL patterns automatically and falls back gracefully if one fails.
+
+### Option 3: Manual Files
 
 For copyrighted works or hard-to-find texts:
 
@@ -181,11 +233,12 @@ For copyrighted works or hard-to-find texts:
    ```
 3. Run corpus cleaner directly (skip downloader)
 
-### Option 3: Mixed Sources
+### Option 4: Mixed Sources
 
-Combine both approaches:
-- Use archive_downloader for public domain works
-- Add additional manual files for recent or hard-to-find texts
+Combine all three — just set the `source` field per entry and run `download_corpus.py`:
+- `"source": "gutenberg"` for clean pre-1928 plain text
+- `"source": "archive"` for 20th century works via search
+- `"source": "manual"` for anything you place yourself
 
 ### Corpus Size Guidelines
 
