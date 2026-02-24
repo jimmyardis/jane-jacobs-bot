@@ -72,6 +72,15 @@ except Exception as e:
     print(f"✗ Error loading ChromaDB collection: {e}")
     sys.exit(1)
 
+# Load discourse collection if available (optional)
+discourse_collection = None
+try:
+    discourse_collection_name = PersonaManager.get_discourse_collection_name(persona_config)
+    discourse_collection = chroma_client.get_collection(discourse_collection_name)
+    print(f"✓ Loaded discourse collection '{discourse_collection_name}' with {discourse_collection.count()} chunks")
+except Exception:
+    print(f"  No discourse collection found (optional — run chunker_embedder.py --discourse to create)")
+
 # Initialize FastAPI app
 app = FastAPI(
     title=f"{persona_config['metadata']['name']} Chatbot API",
@@ -93,6 +102,15 @@ conversations: Dict[str, List[Dict]] = {}
 
 # Build system prompt from persona configuration
 SYSTEM_PROMPT = PersonaManager.build_system_prompt(persona_config)
+
+# Inject characterological notes if available
+context_notes = PersonaManager.load_context_notes(PERSONA_ID)
+if context_notes:
+    SYSTEM_PROMPT += f"\n\n## Characterological Notes\n{context_notes}"
+    print(f"✓ Characterological notes injected into system prompt")
+else:
+    print(f"  No context_notes.md found (optional — run context_synthesizer.py to generate)")
+
 print(f"✓ System prompt built for {persona_config['metadata']['name']}")
 
 
@@ -115,7 +133,7 @@ class ChatResponse(BaseModel):
 
 # Helper functions
 def retrieve_relevant_chunks(query: str, n_results: int = 5) -> List[Dict]:
-    """Retrieve relevant chunks from ChromaDB."""
+    """Retrieve relevant chunks from corpus and discourse collections."""
     # Generate query embedding using OpenAI
     response = openai_client.embeddings.create(
         model="text-embedding-3-small",
@@ -123,37 +141,65 @@ def retrieve_relevant_chunks(query: str, n_results: int = 5) -> List[Dict]:
     )
     query_embedding = response.data[0].embedding
 
-    # Query ChromaDB with the embedding
+    chunks = []
+
+    # Query corpus collection (own words)
     results = collection.query(
         query_embeddings=[query_embedding],
         n_results=n_results
     )
-
-    chunks = []
     if results and results['documents']:
         for i in range(len(results['documents'][0])):
             chunks.append({
                 'text': results['documents'][0][i],
-                'metadata': results['metadatas'][0][i]
+                'metadata': results['metadatas'][0][i],
+                'knowledge_type': 'own words'
             })
+
+    # Query discourse collection if available
+    if discourse_collection:
+        d_results = discourse_collection.query(
+            query_embeddings=[query_embedding],
+            n_results=3
+        )
+        if d_results and d_results['documents']:
+            for i in range(len(d_results['documents'][0])):
+                chunks.append({
+                    'text': d_results['documents'][0][i],
+                    'metadata': d_results['metadatas'][0][i],
+                    'knowledge_type': 'critical discourse'
+                })
 
     return chunks
 
 
 def build_context(chunks: List[Dict]) -> str:
-    """Build context string from retrieved chunks."""
+    """Build context string from retrieved chunks, labelled by knowledge type."""
     if not chunks:
         return ""
 
-    context_parts = ["Here are relevant excerpts from your writings:\n"]
+    own_words = [c for c in chunks if c.get('knowledge_type') == 'own words']
+    discourse = [c for c in chunks if c.get('knowledge_type') == 'critical discourse']
 
-    for i, chunk in enumerate(chunks, 1):
-        metadata = chunk['metadata']
-        title = metadata.get('title', 'Unknown')
-        year = metadata.get('year', 'Unknown')
+    context_parts = []
 
-        context_parts.append(f"\n--- Excerpt {i} ({title}, {year}) ---")
-        context_parts.append(chunk['text'])
+    if own_words:
+        context_parts.append("Here are relevant excerpts from your own writings:\n")
+        for i, chunk in enumerate(own_words, 1):
+            metadata = chunk['metadata']
+            title = metadata.get('title', 'Unknown')
+            year = metadata.get('year', 'Unknown')
+            context_parts.append(f"\n--- Excerpt {i} ({title}, {year}) ---")
+            context_parts.append(chunk['text'])
+
+    if discourse:
+        context_parts.append("\n\nHere are relevant excerpts from critical discourse about your ideas:\n")
+        for i, chunk in enumerate(discourse, 1):
+            metadata = chunk['metadata']
+            title = metadata.get('title', 'Unknown')
+            year = metadata.get('year', 'Unknown')
+            context_parts.append(f"\n--- Discourse {i} ({title}, {year}) ---")
+            context_parts.append(chunk['text'])
 
     return '\n'.join(context_parts)
 
@@ -241,6 +287,7 @@ async def chat(request: ChatRequest):
             sources.append({
                 "title": metadata.get('title', 'Unknown'),
                 "year": metadata.get('year', 'Unknown'),
+                "knowledge_type": chunk.get('knowledge_type', 'own words'),
                 "preview": chunk['text'][:150] + "..."
             })
 

@@ -51,5 +51,35 @@
       "year": 1957,
       "search_terms": "undiscovered self jung"
     }
+  ],
+  "context_sources": [
+    {
+      "title": "Jung: A Biography",
+      "author": "Deirdre Bair",
+      "year": 2003,
+      "source": "manual"
+    },
+    {
+      "title": "The Jung Cult",
+      "author": "Richard Noll",
+      "year": 1994,
+      "source": "manual"
+    },
+    {
+      "title": "Memories, Dreams, Reflections",
+      "author": "Carl Jung / Aniela Jaffé",
+      "year": 1963,
+      "source": "manual",
+      "_note": "Also valuable as corpus/ source — place copy in context/raw/ for characterological synthesis"
+    }
+  ],
+  "discourse_sources": [
+    {
+      "title": "The Freud/Jung Letters",
+      "author": "Sigmund Freud and Carl Jung",
+      "year": 1974,
+      "source": "archive",
+      "search_terms": "freud jung letters correspondence mcguire"
+    }
   ]
 }

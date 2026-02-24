@@ -1,0 +1,95 @@
+{
+  "downloader": "auto",
+  "priority_1": [
+    {
+      "title": "Notes on the State of Virginia",
+      "author": "Thomas Jefferson",
+      "year": 1785,
+      "source": "gutenberg",
+      "gutenberg_id": 16784
+    },
+    {
+      "title": "The Declaration of Independence of the United States of America",
+      "author": "Thomas Jefferson",
+      "year": 1776,
+      "source": "gutenberg",
+      "gutenberg_id": 1
+    },
+    {
+      "title": "Memoir Correspondence and Miscellanies Vol 1",
+      "author": "Thomas Jefferson",
+      "year": 1829,
+      "source": "gutenberg",
+      "gutenberg_id": 16781
+    },
+    {
+      "title": "Memoir Correspondence and Miscellanies Vol 2",
+      "author": "Thomas Jefferson",
+      "year": 1829,
+      "source": "gutenberg",
+      "gutenberg_id": 16782
+    },
+    {
+      "title": "Memoir Correspondence and Miscellanies Vol 3",
+      "author": "Thomas Jefferson",
+      "year": 1829,
+      "source": "gutenberg",
+      "gutenberg_id": 16783
+    },
+    {
+      "title": "The Writings of Thomas Jefferson Vol 1 (Autobiography)",
+      "author": "Thomas Jefferson",
+      "year": 1853,
+      "source": "gutenberg",
+      "gutenberg_id": 45847
+    }
+  ],
+  "priority_2": [
+    {
+      "title": "The Writings of Thomas Jefferson (1854 Collection)",
+      "author": "Thomas Jefferson",
+      "year": 1854,
+      "source": "gutenberg",
+      "gutenberg_id": 1327
+    },
+    {
+      "title": "Autobiography of Thomas Jefferson 1743-1790",
+      "author": "Thomas Jefferson",
+      "year": 1914,
+      "source": "archive",
+      "archive_identifier": "autobiography00jeffrich"
+    }
+  ],
+  "context_sources": [
+    {
+      "title": "American Sphinx: The Character of Thomas Jefferson",
+      "author": "Joseph J. Ellis",
+      "year": 1997,
+      "source": "manual"
+    },
+    {
+      "title": "Thomas Jefferson: The Art of Power",
+      "author": "Jon Meacham",
+      "year": 2012,
+      "source": "manual"
+    },
+    {
+      "title": "The Domestic Life of Thomas Jefferson",
+      "author": "Sarah N. Randolph",
+      "year": 1871,
+      "source": "gutenberg",
+      "gutenberg_id": 43331,
+      "_note": "Written by Jefferson's granddaughter — characterological source, place in context/raw/"
+    }
+  ],
+  "discourse_sources": [
+    {
+      "title": "Thomas Jefferson, the Apostle of Americanism",
+      "author": "Gilbert Chinard",
+      "year": 1929,
+      "source": "gutenberg",
+      "gutenberg_id": 38073,
+      "_note": "Critical biography — embed in discourse collection"
+    }
+  ]
+}

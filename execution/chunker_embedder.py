@@ -150,12 +150,13 @@ def create_embeddings_batch(texts: List[str], client: OpenAI, model: str = "text
         return []
 
 
-def main(persona_id: str = "jane-jacobs"):
+def main(persona_id: str = "jane-jacobs", discourse: bool = False):
     """
     Main execution function.
 
     Args:
         persona_id: Persona identifier (e.g., 'jane-jacobs')
+        discourse: If True, embed discourse/ texts into a separate discourse collection
     """
     # Load environment variables
     load_dotenv()
@@ -181,25 +182,33 @@ def main(persona_id: str = "jane-jacobs"):
     # Set up directories from persona config
     script_dir = Path(__file__).parent
     project_root = script_dir.parent
-    corpus_paths = PersonaManager.get_corpus_paths(persona_config)
-    corpus_cleaned = corpus_paths['cleaned']
     chroma_db_dir = project_root / "chroma_db"
-
     chroma_db_dir.mkdir(parents=True, exist_ok=True)
 
-    print(f"{persona_config['metadata']['name']} Chunker & Embedder")
+    if discourse:
+        discourse_paths = PersonaManager.get_discourse_paths(persona_config)
+        source_dir = discourse_paths['cleaned']
+        collection_label = "Discourse Embedder"
+        no_files_hint = f"  Add cleaned discourse texts to discourse/cleaned/ first"
+    else:
+        corpus_paths = PersonaManager.get_corpus_paths(persona_config)
+        source_dir = corpus_paths['cleaned']
+        collection_label = "Chunker & Embedder"
+        no_files_hint = f"  Run corpus_cleaner.py --persona {persona_id} first"
+
+    print(f"{persona_config['metadata']['name']} {collection_label}")
     print("=" * 60)
-    print(f"Source directory: {corpus_cleaned}")
+    print(f"Source directory: {source_dir}")
     print(f"ChromaDB directory: {chroma_db_dir}")
     print()
 
     # Load cleaned texts
     print("Loading cleaned texts...")
-    texts = load_cleaned_texts(corpus_cleaned)
+    texts = load_cleaned_texts(source_dir)
 
     if not texts:
         print("✗ No cleaned texts found")
-        print(f"  Run corpus_cleaner.py --persona {persona_id} first")
+        print(no_files_hint)
         sys.exit(1)
 
     print(f"✓ Loaded {len(texts)} text file(s)\n")
@@ -212,7 +221,10 @@ def main(persona_id: str = "jane-jacobs"):
     )
 
     # Get or create collection
-    collection_name = PersonaManager.get_collection_name(persona_config)
+    if discourse:
+        collection_name = PersonaManager.get_discourse_collection_name(persona_config)
+    else:
+        collection_name = PersonaManager.get_collection_name(persona_config)
 
     try:
         # Try to delete existing collection
@@ -341,6 +353,11 @@ if __name__ == "__main__":
         default="jane-jacobs",
         help="Persona ID to process (default: jane-jacobs)"
     )
+    parser.add_argument(
+        "--discourse",
+        action="store_true",
+        help="Embed discourse/ texts into a separate {persona}_discourse collection"
+    )
     args = parser.parse_args()
 
-    main(persona_id=args.persona)
+    main(persona_id=args.persona, discourse=args.discourse)

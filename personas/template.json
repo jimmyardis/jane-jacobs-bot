@@ -57,5 +57,24 @@
     "max_tokens": 1024,
     "embedding_model": "text-embedding-3-small",
     "retrieval_chunks": 5
-  }
+  },
+  "context_sources": [
+    {
+      "title": "Biography or memoir about the figure",
+      "author": "Biographer Name",
+      "year": 2000,
+      "source": "manual",
+      "_comment": "Biographical/characterological sources. Place files in context/raw/. Run context_synthesizer.py --persona your-id to generate context_notes.md."
+    }
+  ],
+  "discourse_sources": [
+    {
+      "title": "Critical or analytical work about the figure",
+      "author": "Critic Name",
+      "year": 1990,
+      "source": "archive",
+      "search_terms": "critical work title author name",
+      "_comment": "Works that analyzed, critiqued, or responded to this figure. Clean files go in discourse/cleaned/. Run chunker_embedder.py --persona your-id --discourse."
+    }
+  ]
 }

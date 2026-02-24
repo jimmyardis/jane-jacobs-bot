@@ -1,0 +1,118 @@
+{
+  "processed_files": [
+    {
+      "source_file": "Autobiography_of_Thomas_Jefferson_1821.pdf",
+      "output_file": "Autobiography_of_Thomas_Jefferson_1821.txt",
+      "original_length": 273211,
+      "cleaned_length": 272988,
+      "metadata": {}
+    },
+    {
+      "source_file": "Memoir_Correspondence_and_Miscellanies_Vol_1_1829.txt",
+      "output_file": "Memoir_Correspondence_and_Miscellanies_Vol_1_1829.txt",
+      "original_length": 1182917,
+      "cleaned_length": 1174813,
+      "metadata": {
+        "title": "Memoir Correspondence and Miscellanies Vol 1",
+        "author": "Thomas Jefferson",
+        "year": 1829,
+        "gutenberg_id": 16781,
+        "download_url": "https://www.gutenberg.org/cache/epub/16781/pg16781.txt"
+      }
+    },
+    {
+      "source_file": "Memoir_Correspondence_and_Miscellanies_Vol_2_1829.txt",
+      "output_file": "Memoir_Correspondence_and_Miscellanies_Vol_2_1829.txt",
+      "original_length": 1261723,
+      "cleaned_length": 1256905,
+      "metadata": {
+        "title": "Memoir Correspondence and Miscellanies Vol 2",
+        "author": "Thomas Jefferson",
+        "year": 1829,
+        "gutenberg_id": 16782,
+        "download_url": "https://www.gutenberg.org/cache/epub/16782/pg16782.txt"
+      }
+    },
+    {
+      "source_file": "Memoir_Correspondence_and_Miscellanies_Vol_3_1829.txt",
+      "output_file": "Memoir_Correspondence_and_Miscellanies_Vol_3_1829.txt",
+      "original_length": 1245360,
+      "cleaned_length": 1238548,
+      "metadata": {
+        "title": "Memoir Correspondence and Miscellanies Vol 3",
+        "author": "Thomas Jefferson",
+        "year": 1829,
+        "gutenberg_id": 16783,
+        "download_url": "https://www.gutenberg.org/cache/epub/16783/pg16783.txt"
+      }
+    },
+    {
+      "source_file": "Notes_on_the_State_of_Virginia_1785.txt",
+      "output_file": "Notes_on_the_State_of_Virginia_1785.txt",
+      "original_length": 1351942,
+      "cleaned_length": 1347754,
+      "metadata": {
+        "title": "Notes on the State of Virginia",
+        "author": "Thomas Jefferson",
+        "year": 1785,
+        "gutenberg_id": 16784,
+        "download_url": "https://www.gutenberg.org/cache/epub/16784/pg16784.txt"
+      }
+    },
+    {
+      "source_file": "The_Declaration_of_Independence_of_the_United_States_of_America_1776.txt",
+      "output_file": "The_Declaration_of_Independence_of_the_United_States_of_America_1776.txt",
+      "original_length": 30052,
+      "cleaned_length": 29783,
+      "metadata": {
+        "title": "The Declaration of Independence of the United States of America",
+        "author": "Thomas Jefferson",
+        "year": 1776,
+        "gutenberg_id": 1,
+        "download_url": "https://www.gutenberg.org/cache/epub/1/pg1.txt"
+      }
+    },
+    {
+      "source_file": "The_Writings_of_Thomas_Jefferson_1854.txt",
+      "output_file": "The_Writings_of_Thomas_Jefferson_1854.txt",
+      "original_length": 283742,
+      "cleaned_length": 283403,
+      "metadata": {
+        "title": "The Writings of Thomas Jefferson",
+        "author": "Thomas Jefferson",
+        "year": 1854,
+        "gutenberg_id": 1327,
+        "download_url": "https://www.gutenberg.org/cache/epub/1327/pg1327.txt"
+      }
+    },
+    {
+      "source_file": "The_Writings_of_Thomas_Jefferson_Vol_1__Autobiography__1853.txt",
+      "output_file": "The_Writings_of_Thomas_Jefferson_Vol_1__Autobiography__1853.txt",
+      "original_length": 1362092,
+      "cleaned_length": 1326124,
+      "metadata": {
+        "title": "The Writings of Thomas Jefferson Vol 1 (Autobiography)",
+        "author": "Thomas Jefferson",
+        "year": 1853,
+        "gutenberg_id": 45847,
+        "download_url": "https://www.gutenberg.org/cache/epub/45847/pg45847.txt"
+      }
+    },
+    {
+      "source_file": "The_Writings_of_Thomas_Jefferson__1854_Collection__1854.txt",
+      "output_file": "The_Writings_of_Thomas_Jefferson__1854_Collection__1854.txt",
+      "original_length": 283742,
+      "cleaned_length": 283403,
+      "metadata": {
+        "title": "The Writings of Thomas Jefferson (1854 Collection)",
+        "author": "Thomas Jefferson",
+        "year": 1854,
+        "gutenberg_id": 1327,
+        "download_url": "https://www.gutenberg.org/cache/epub/1327/pg1327.txt"
+      }
+    }
+  ],
+  "total_files": 9,
+  "successful": 9,
+  "failed": 0
+}

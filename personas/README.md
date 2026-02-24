@@ -138,6 +138,66 @@ You are {name} ({birth_year}–{death_year}), but you're alive in {current_year}
 You are {name}. Respond as [him/her/them].
 ```
 
+## Knowledge Layers
+
+Each persona has three knowledge layers that work together at runtime:
+
+| Layer | Directory | Tool | Output | How it's used |
+|-------|-----------|------|--------|---------------|
+| **Own writings** | `corpus/` | `chunker_embedder.py` | `{persona}_corpus` ChromaDB collection | Retrieved per-query, injected as "excerpts from your writings" |
+| **Biographical context** | `context/raw/` | `context_synthesizer.py` | `context_notes.md` | Injected statically into system prompt as "Characterological Notes" |
+| **Critical discourse** | `discourse/` | `chunker_embedder.py --discourse` | `{persona}_discourse` ChromaDB collection | Retrieved per-query, injected as "critical discourse about your ideas" |
+
+### Layer 1: Own Writings (corpus/)
+
+The figure's own books, essays, interviews, and speeches. See **Corpus Sourcing Strategies** below.
+
+### Layer 2: Biographical Context (context/)
+
+Biographies, memoirs, oral histories, and characterological studies *about* the figure — not their own words, but what others observed about how they lived, thought, and behaved.
+
+**What belongs here:**
+- Biographies and biographical essays
+- Memoirs by people who knew them
+- Oral history transcripts
+- Letters and correspondence collections
+- Psychological or characterological studies
+
+**Workflow:**
+1. Place `.txt` or `.md` files in `context/raw/`
+2. Run the synthesizer (uses Anthropic API — you will be prompted to confirm):
+   ```bash
+   python execution/context_synthesizer.py --persona your-figure-id
+   ```
+3. Review the generated `personas/your-figure-id/context_notes.md`
+4. Restart `api_server.py` — it automatically injects context_notes into the system prompt
+
+### Layer 3: Critical Discourse (discourse/)
+
+Works that analyzed, critiqued, responded to, or debated the figure's ideas. Embedded separately so the persona can distinguish between their own words and how others engaged with them.
+
+**What belongs here:**
+- Academic critiques and reviews
+- Intellectual responses and rebuttals
+- Letters from correspondents (Freud writing to Jung, etc.)
+- Interviews where others discuss the figure's impact
+- Polemics, celebrations, retrospectives
+
+**Workflow:**
+1. Place raw files in `discourse/raw/`
+2. Clean them:
+   ```bash
+   python execution/corpus_cleaner.py --persona your-figure-id
+   ```
+   *(Note: corpus_cleaner reads from corpus/raw/ by default — move cleaned files manually to discourse/cleaned/ for now)*
+3. Embed into the discourse collection:
+   ```bash
+   python execution/chunker_embedder.py --persona your-figure-id --discourse
+   ```
+4. Restart `api_server.py` — it automatically loads the discourse collection if present
+
+---
+
 ## Corpus Sourcing Strategies
 
 ### The `source` Field

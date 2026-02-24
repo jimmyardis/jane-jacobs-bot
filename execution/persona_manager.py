@@ -228,6 +228,71 @@ class PersonaManager:
             )
 
     @staticmethod
+    def get_context_path(config: Dict[str, Any], personas_dir: str = "personas") -> Path:
+        """
+        Get path to context/raw/ directory for a persona
+
+        Returns:
+            Path to personas/{persona}/context/raw/
+        """
+        persona_id = config['id']
+        if not os.path.isabs(personas_dir):
+            project_root = Path(__file__).parent.parent
+            return project_root / personas_dir / persona_id / "context" / "raw"
+        return Path(personas_dir) / persona_id / "context" / "raw"
+
+    @staticmethod
+    def get_discourse_paths(config: Dict[str, Any], personas_dir: str = "personas") -> Dict[str, Path]:
+        """
+        Get discourse directory paths for a persona
+
+        Returns:
+            Dictionary with 'raw', 'cleaned', and 'base' Path objects for discourse/
+        """
+        persona_id = config['id']
+        if not os.path.isabs(personas_dir):
+            project_root = Path(__file__).parent.parent
+            base_path = project_root / personas_dir / persona_id / "discourse"
+        else:
+            base_path = Path(personas_dir) / persona_id / "discourse"
+
+        return {
+            'raw': base_path / 'raw',
+            'cleaned': base_path / 'cleaned',
+            'base': base_path
+        }
+
+    @staticmethod
+    def get_discourse_collection_name(config: Dict[str, Any]) -> str:
+        """
+        Get ChromaDB collection name for the discourse collection
+
+        Returns:
+            Collection name string (e.g., 'carl_jung_discourse')
+        """
+        return config['corpus']['collection_name'].replace('_corpus', '_discourse')
+
+    @staticmethod
+    def load_context_notes(persona_id: str, personas_dir: str = "personas") -> Optional[str]:
+        """
+        Load context_notes.md for a persona if it exists
+
+        Returns:
+            File contents as string, or None if file doesn't exist
+        """
+        if not os.path.isabs(personas_dir):
+            project_root = Path(__file__).parent.parent
+            notes_path = project_root / personas_dir / persona_id / "context_notes.md"
+        else:
+            notes_path = Path(personas_dir) / persona_id / "context_notes.md"
+
+        if not notes_path.exists():
+            return None
+
+        with open(notes_path, 'r', encoding='utf-8') as f:
+            return f.read()
+
+    @staticmethod
     def list_available_personas(personas_dir: str = "personas") -> list[str]:
         """
         List all available persona IDs in the personas directory
