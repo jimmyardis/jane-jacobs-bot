@@ -1,0 +1,206 @@
+{
+  "downloader": "auto",
+  "_comment": "Run: python execution/download_corpus.py --persona alexander-hamilton. All sources are public domain — Hamilton died in 1804. The Lodge 12-volume set is the comprehensive source; individual reports are also targeted separately as they may appear as standalone scans.",
+  "priority_1": [
+    {
+      "title": "The Federalist Papers",
+      "author": "Alexander Hamilton, James Madison, John Jay",
+      "year": 1788,
+      "source": "gutenberg",
+      "gutenberg_id": 1404,
+      "_note": "Complete collection of all 85 papers. Hamilton authored 51 (Nos. 1, 6-9, 11-13, 15-17, 21-36, 59-61, 65-85). The definitive statement of his constitutional and political theory."
+    },
+    {
+      "title": "Works of Alexander Hamilton Vol 1 (Lodge Edition)",
+      "author": "Alexander Hamilton",
+      "year": 1904,
+      "source": "archive",
+      "search_terms": "works alexander hamilton lodge volume 1"
+    },
+    {
+      "title": "Works of Alexander Hamilton Vol 2 (Lodge Edition)",
+      "author": "Alexander Hamilton",
+      "year": 1904,
+      "source": "archive",
+      "search_terms": "works alexander hamilton lodge volume 2"
+    },
+    {
+      "title": "Works of Alexander Hamilton Vol 3 (Lodge Edition)",
+      "author": "Alexander Hamilton",
+      "year": 1904,
+      "source": "archive",
+      "search_terms": "works alexander hamilton lodge volume 3"
+    },
+    {
+      "title": "Works of Alexander Hamilton Vol 4 (Lodge Edition)",
+      "author": "Alexander Hamilton",
+      "year": 1904,
+      "source": "archive",
+      "search_terms": "works alexander hamilton lodge volume 4"
+    },
+    {
+      "title": "Works of Alexander Hamilton Vol 5 (Lodge Edition)",
+      "author": "Alexander Hamilton",
+      "year": 1904,
+      "source": "archive",
+      "search_terms": "works alexander hamilton lodge volume 5"
+    },
+    {
+      "title": "Works of Alexander Hamilton Vol 6 (Lodge Edition)",
+      "author": "Alexander Hamilton",
+      "year": 1904,
+      "source": "archive",
+      "search_terms": "works alexander hamilton lodge volume 6"
+    },
+    {
+      "title": "Report on Public Credit",
+      "author": "Alexander Hamilton",
+      "year": 1790,
+      "source": "archive",
+      "search_terms": "hamilton report on public credit 1790 first report",
+      "_note": "Hamilton's first major report as Secretary of the Treasury — the founding document of American public finance. Also contained in Lodge Vol 4."
+    },
+    {
+      "title": "Report on a National Bank",
+      "author": "Alexander Hamilton",
+      "year": 1790,
+      "source": "archive",
+      "search_terms": "hamilton report national bank 1790 secretary treasury",
+      "_note": "The argument for the Bank of the United States; includes Hamilton's doctrine of implied powers. Also in Lodge collection."
+    },
+    {
+      "title": "Report on Manufactures",
+      "author": "Alexander Hamilton",
+      "year": 1791,
+      "source": "archive",
+      "search_terms": "hamilton report on manufactures 1791 secretary treasury",
+      "_note": "Hamilton's case for industrial policy and protective tariffs — his most visionary document and the one most vindicated by 19th century history. Also in Lodge collection."
+    }
+  ],
+  "priority_2": [
+    {
+      "title": "Works of Alexander Hamilton Vol 7 (Lodge Edition)",
+      "author": "Alexander Hamilton",
+      "year": 1904,
+      "source": "archive",
+      "search_terms": "works alexander hamilton lodge volume 7"
+    },
+    {
+      "title": "Works of Alexander Hamilton Vol 8 (Lodge Edition)",
+      "author": "Alexander Hamilton",
+      "year": 1904,
+      "source": "archive",
+      "search_terms": "works alexander hamilton lodge volume 8"
+    },
+    {
+      "title": "Works of Alexander Hamilton Vol 9 (Lodge Edition)",
+      "author": "Alexander Hamilton",
+      "year": 1904,
+      "source": "archive",
+      "search_terms": "works alexander hamilton lodge volume 9"
+    },
+    {
+      "title": "Works of Alexander Hamilton Vol 10 (Lodge Edition)",
+      "author": "Alexander Hamilton",
+      "year": 1904,
+      "source": "archive",
+      "search_terms": "works alexander hamilton lodge volume 10"
+    },
+    {
+      "title": "Works of Alexander Hamilton Vol 11 (Lodge Edition)",
+      "author": "Alexander Hamilton",
+      "year": 1904,
+      "source": "archive",
+      "search_terms": "works alexander hamilton lodge volume 11"
+    },
+    {
+      "title": "Works of Alexander Hamilton Vol 12 (Lodge Edition)",
+      "author": "Alexander Hamilton",
+      "year": 1904,
+      "source": "archive",
+      "search_terms": "works alexander hamilton lodge volume 12"
+    },
+    {
+      "title": "Observations on Certain Documents (Reynolds Pamphlet)",
+      "author": "Alexander Hamilton",
+      "year": 1797,
+      "source": "archive",
+      "search_terms": "hamilton reynolds pamphlet observations certain documents 1797",
+      "_note": "Hamilton's remarkable self-published confession of adultery, written to defend his financial integrity against speculation charges. Extraordinary primary source for his psychology and his hierarchy of values — reputation for public probity above all else, including his marriage."
+    },
+    {
+      "title": "The Letters of Alexander Hamilton — Military Correspondence",
+      "author": "Alexander Hamilton",
+      "year": 1850,
+      "source": "archive",
+      "search_terms": "hamilton letters correspondence military washington aide de camp revolutionary war",
+      "_note": "Hamilton's wartime correspondence with Washington, Lafayette, and others. Shows the military mind behind the financial architect."
+    },
+    {
+      "title": "Hamilton's Legal Opinions and Arguments",
+      "author": "Alexander Hamilton",
+      "year": 1850,
+      "source": "archive",
+      "search_terms": "hamilton legal opinions arguments attorney new york law",
+      "_note": "Hamilton's legal writings from his New York law practice. The same structural rigor he brought to finance."
+    },
+    {
+      "title": "The Works of Alexander Hamilton (1850 John C. Hamilton Edition)",
+      "author": "Alexander Hamilton",
+      "year": 1850,
+      "source": "archive",
+      "search_terms": "works of alexander hamilton john c hamilton 1850 7 volumes",
+      "_note": "Earlier 7-volume edition compiled by Hamilton's son John C. Hamilton. Predates Lodge but includes valuable correspondence not in all later editions."
+    }
+  ],
+  "context_sources": [
+    {
+      "title": "Alexander Hamilton",
+      "author": "Ron Chernow",
+      "year": 2004,
+      "source": "manual",
+      "_comment": "The definitive biography — 818 pages, basis for the Lin-Manuel Miranda musical. Chernow rehabilitated Hamilton from Jeffersonian caricature. Place in context/raw/ and run context_synthesizer.py --persona alexander-hamilton."
+    },
+    {
+      "title": "The Quartet: Orchestrating the Second American Revolution, 1783-1789",
+      "author": "Joseph J. Ellis",
+      "year": 2015,
+      "source": "manual",
+      "_comment": "Ellis on the four men (Hamilton, Madison, Jay, Washington) who engineered the Constitutional Convention and ratification. Places Hamilton's role in the constitutional moment precisely. Place in context/raw/."
+    }
+  ],
+  "discourse_sources": [
+    {
+      "title": "Memoir Correspondence and Miscellanies Vol 1 (Jefferson Letters)",
+      "author": "Thomas Jefferson",
+      "year": 1829,
+      "source": "gutenberg",
+      "gutenberg_id": 16781,
+      "_note": "Contains Jefferson's letters to Madison and others condemning Hamilton's financial system as monarchist corruption. Primary source for the anti-Hamilton argument. Embed in discourse collection."
+    },
+    {
+      "title": "Memoir Correspondence and Miscellanies Vol 2 (Jefferson Letters)",
+      "author": "Thomas Jefferson",
+      "year": 1829,
+      "source": "gutenberg",
+      "gutenberg_id": 16782,
+      "_note": "Continued Jefferson correspondence attacking Hamiltonian policy and vision. Embed in discourse collection."
+    },
+    {
+      "title": "Works of James Madison — Letters and Papers",
+      "author": "James Madison",
+      "year": 1900,
+      "source": "archive",
+      "search_terms": "works of james madison letters papers gaillard hunt congress",
+      "_note": "Madison's political papers and correspondence — he was Hamilton's co-author on the Federalist and later his principal antagonist. His Federalist No. 10 and 51 provide the contrasting Madisonian vision of government. Embed in discourse collection."
+    },
+    {
+      "title": "The Works of John Adams — Letters and Correspondence",
+      "author": "John Adams",
+      "year": 1850,
+      "source": "archive",
+      "search_terms": "works of john adams little brown charles francis adams correspondence",
+      "_note": "Adams loathed Hamilton and wrote some of the most devastating personal critiques in American political history. The Letters to Timothy Pickering (1804) and his later correspondence are particularly sharp. Embed in discourse collection."
+    }
+  ]
+}

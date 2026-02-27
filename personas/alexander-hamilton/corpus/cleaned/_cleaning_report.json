@@ -1,0 +1,118 @@
+{
+  "processed_files": [
+    {
+      "source_file": "Lodge_Works_of_Hamilton_Vol_10_1904.txt",
+      "output_file": "Lodge_Works_of_Hamilton_Vol_10_1904.txt",
+      "original_length": 954705,
+      "cleaned_length": 823378,
+      "metadata": {}
+    },
+    {
+      "source_file": "Lodge_Works_of_Hamilton_Vol_11_1904.txt",
+      "output_file": "Lodge_Works_of_Hamilton_Vol_11_1904.txt",
+      "original_length": 787905,
+      "cleaned_length": 688680,
+      "metadata": {}
+    },
+    {
+      "source_file": "Lodge_Works_of_Hamilton_Vol_12_1904.txt",
+      "output_file": "Lodge_Works_of_Hamilton_Vol_12_1904.txt",
+      "original_length": 786977,
+      "cleaned_length": 685952,
+      "metadata": {}
+    },
+    {
+      "source_file": "Lodge_Works_of_Hamilton_Vol_1_1904.txt",
+      "output_file": "Lodge_Works_of_Hamilton_Vol_1_1904.txt",
+      "original_length": 769352,
+      "cleaned_length": 668389,
+      "metadata": {}
+    },
+    {
+      "source_file": "Lodge_Works_of_Hamilton_Vol_2_1904.txt",
+      "output_file": "Lodge_Works_of_Hamilton_Vol_2_1904.txt",
+      "original_length": 857608,
+      "cleaned_length": 745309,
+      "metadata": {}
+    },
+    {
+      "source_file": "Lodge_Works_of_Hamilton_Vol_3_1904.txt",
+      "output_file": "Lodge_Works_of_Hamilton_Vol_3_1904.txt",
+      "original_length": 911437,
+      "cleaned_length": 790295,
+      "metadata": {}
+    },
+    {
+      "source_file": "Lodge_Works_of_Hamilton_Vol_4_1904.txt",
+      "output_file": "Lodge_Works_of_Hamilton_Vol_4_1904.txt",
+      "original_length": 896355,
+      "cleaned_length": 778584,
+      "metadata": {}
+    },
+    {
+      "source_file": "Lodge_Works_of_Hamilton_Vol_5_1904.txt",
+      "output_file": "Lodge_Works_of_Hamilton_Vol_5_1904.txt",
+      "original_length": 906591,
+      "cleaned_length": 787954,
+      "metadata": {}
+    },
+    {
+      "source_file": "Lodge_Works_of_Hamilton_Vol_6_1904.txt",
+      "output_file": "Lodge_Works_of_Hamilton_Vol_6_1904.txt",
+      "original_length": 894599,
+      "cleaned_length": 780107,
+      "metadata": {}
+    },
+    {
+      "source_file": "Lodge_Works_of_Hamilton_Vol_7_1904.txt",
+      "output_file": "Lodge_Works_of_Hamilton_Vol_7_1904.txt",
+      "original_length": 838030,
+      "cleaned_length": 728239,
+      "metadata": {}
+    },
+    {
+      "source_file": "Lodge_Works_of_Hamilton_Vol_8_1904.txt",
+      "output_file": "Lodge_Works_of_Hamilton_Vol_8_1904.txt",
+      "original_length": 925336,
+      "cleaned_length": 806601,
+      "metadata": {}
+    },
+    {
+      "source_file": "Lodge_Works_of_Hamilton_Vol_9_1904.txt",
+      "output_file": "Lodge_Works_of_Hamilton_Vol_9_1904.txt",
+      "original_length": 985207,
+      "cleaned_length": 852918,
+      "metadata": {}
+    },
+    {
+      "source_file": "Report_on_Manufactures_1791.pdf",
+      "output_file": "Report_on_Manufactures_1791.txt",
+      "original_length": 1642218,
+      "cleaned_length": 1382495,
+      "metadata": {
+        "title": "Report on Manufactures",
+        "author": "Alexander Hamilton",
+        "year": 1791,
+        "archive_identifier": "reportsofsecretaunit",
+        "archive_filename": "reportsofsecretaunit.pdf",
+        "download_url": "https://archive.org/download/reportsofsecretaunit/reportsofsecretaunit.pdf"
+      }
+    },
+    {
+      "source_file": "The_Federalist_Papers_1788.txt",
+      "output_file": "The_Federalist_Papers_1788.txt",
+      "original_length": 1166964,
+      "cleaned_length": 1165065,
+      "metadata": {
+        "title": "The Federalist Papers",
+        "author": "Alexander Hamilton, James Madison, John Jay",
+        "year": 1788,
+        "gutenberg_id": 1404,
+        "download_url": "https://www.gutenberg.org/cache/epub/1404/pg1404.txt"
+      }
+    }
+  ],
+  "total_files": 14,
+  "successful": 14,
+  "failed": 0
+}
