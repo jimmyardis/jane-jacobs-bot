@@ -2,8 +2,8 @@
 .env
 *.env
 
-# Vector database (committed for Railway deployment - no rebuild needed)
-# chroma_db/
+# Vector database (rebuilt at deploy time via build command)
+chroma_db/
 
 # Python
 __pycache__/
