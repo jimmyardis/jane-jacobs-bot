@@ -1,0 +1,78 @@
+{
+  "downloader": "auto",
+  "_comment": "Taylor died in 1824 — all works public domain. Project Gutenberg has no Taylor entries. Use archive_downloader.py with the identifiers below, or the corpus/cleaned/ files already committed (downloaded March 2026 via Archive.org and Wikisource). Run: python execution/download_corpus.py --persona john-taylor-of-caroline",
+  "_digitization_note": "Taylor is significantly less well-digitized than Hamilton or Jefferson. The correct Archive.org identifiers follow the Open Library naming convention (aratorbeingserie1813tayl), NOT the University of Toronto suffix pattern (arator00tayluoft). Tyranny Unmasked on Archive.org is a Liberty Fund reprint under controlled digital lending — retrieved from Wikisource instead. Definition of Parties (1794) not found in any accessible digitized form.",
+  "priority_1": [
+    {
+      "title": "An Inquiry into the Principles and Policy of the Government of the United States",
+      "author": "John Taylor of Caroline",
+      "year": 1814,
+      "source": "archive",
+      "search_terms": "Inquiry Principles Policy Government United States Taylor 1814",
+      "archive_identifier": "inquiryintoprinc00tayl",
+      "_note": "Taylor's major philosophical work — 600+ pages of systematic argument against Hamilton's financial system and paper aristocracy. Direct reply to John Adams' Defence of the Constitutions."
+    },
+    {
+      "title": "Arator: Being a Series of Agricultural Essays, Practical and Political",
+      "author": "John Taylor of Caroline",
+      "year": 1813,
+      "source": "archive",
+      "search_terms": "Arator Taylor Caroline agricultural essays political 1813",
+      "archive_identifier": "aratorbeingserie1813tayl",
+      "_note": "Taylor's masterwork on agrarian political economy — interweaves practical farming advice with republican philosophy."
+    },
+    {
+      "title": "Construction Construed and Constitutions Vindicated",
+      "author": "John Taylor of Caroline",
+      "year": 1820,
+      "source": "archive",
+      "search_terms": "Construction Construed Constitutions Vindicated Taylor 1820",
+      "archive_identifier": "constructioncon01taylgoog",
+      "_note": "Taylor's constitutional argument against the Marshall Court's broad construction doctrine, particularly McCulloch v. Maryland."
+    },
+    {
+      "title": "Tyranny Unmasked",
+      "author": "John Taylor of Caroline",
+      "year": 1822,
+      "source": "manual",
+      "_note": "Retrieved from Wikisource (en.wikisource.org/wiki/Tyranny_Unmasked) — Preface, Section I, II, III. Archive.org copy (tyrannyunmasked0000tayl) is a Liberty Fund reprint under controlled digital lending; all file types return 403."
+    },
+    {
+      "title": "New Views of the Constitution of the United States",
+      "author": "John Taylor of Caroline",
+      "year": 1823,
+      "source": "archive",
+      "search_terms": "New Views Constitution United States Taylor 1823",
+      "archive_identifier": "newviewsofconsti00tayl",
+      "_note": "Taylor's final major work — historical and textual argument that the Constitution was a compact of sovereign states."
+    }
+  ],
+  "priority_2": [
+    {
+      "title": "An Enquiry into the Principles and Tendency of Certain Public Measures",
+      "author": "John Taylor of Caroline",
+      "year": 1794,
+      "source": "archive",
+      "search_terms": "Enquiry Principles Tendency Certain Public Measures Taylor 1794",
+      "archive_identifier": "enquiryintoprinc01tayl",
+      "_note": "Taylor's early extended attack on Hamilton's financial measures. Establishes the analytical framework he would develop at full length in the 1814 Inquiry."
+    },
+    {
+      "title": "Taylor Correspondence — Tyler's Quarterly Historical and Genealogical Magazine",
+      "author": "John Taylor of Caroline et al.",
+      "year": 1920,
+      "source": "archive",
+      "search_terms": "Tyler's Quarterly Historical Genealogical Magazine Virginia letters",
+      "archive_identifier": "tylersquarterly00tylegoog",
+      "_note": "Selected Taylor correspondence. Partial — full correspondence in manuscript collections at Library of Congress and Virginia Historical Society."
+    }
+  ],
+  "not_found": [
+    {
+      "title": "A Definition of Parties (1794)",
+      "author": "John Taylor of Caroline",
+      "year": 1794,
+      "_note": "Not found in any accessible digitized form as of March 2026. May be available through Readex Early American Imprints (institutional subscription) or physical archives (AAS, Library of Congress)."
+    }
+  ]
+}
