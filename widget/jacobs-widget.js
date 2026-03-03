@@ -239,12 +239,35 @@
         input.value = '';
     }
 
+    // Show three-dot loading indicator while bot is preparing a response
+    function showTypingIndicator() {
+        const messagesContainer = document.getElementById('jj-messages');
+        const el = document.createElement('div');
+        el.id = 'jj-typing-bubble';
+        el.className = 'jj-message jj-message-assistant';
+        el.innerHTML = `
+            <div class="jj-message-content">
+                <div class="jj-typing-indicator">
+                    <span></span><span></span><span></span>
+                </div>
+            </div>`;
+        messagesContainer.appendChild(el);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    // Remove the typing indicator before inserting the real response
+    function removeTypingIndicator() {
+        const el = document.getElementById('jj-typing-bubble');
+        if (el) el.remove();
+    }
+
     // Send message with specific text
     async function sendMessageWithText(message) {
         hideStarters();
         addMessage('user', message);
 
         isTyping = true;
+        showTypingIndicator();
 
         try {
             const response = await fetch(`${API_URL}/chat`, {
@@ -264,12 +287,14 @@
             conversationId = data.conversation_id;
 
             // Add assistant response with typewriter effect
+            removeTypingIndicator();
             addMessage('assistant', data.response, true);
 
         } catch (error) {
             console.error('Error sending message:', error);
             const errorMsg = personaConfig?.widget?.ui?.error_message ||
                            'Sorry, I encountered an error. Please try again.';
+            removeTypingIndicator();
             addMessage('assistant', errorMsg);
         } finally {
             isTyping = false;

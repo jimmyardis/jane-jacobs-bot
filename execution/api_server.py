@@ -16,7 +16,7 @@ from pydantic import BaseModel
 import chromadb
 from chromadb.config import Settings
 from anthropic import Anthropic
-from openai import OpenAI
+from sentence_transformers import SentenceTransformer
 
 from persona_manager import PersonaManager
 
@@ -36,50 +36,54 @@ except Exception as e:
 
 # Initialize clients
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
+PINECONE_HOST = os.getenv("PINECONE_HOST")
+USE_PINECONE = bool(PINECONE_API_KEY)
 
 if not ANTHROPIC_API_KEY:
     print("✗ Error: ANTHROPIC_API_KEY not found in environment")
     sys.exit(1)
 
-if not OPENAI_API_KEY:
-    print("✗ Error: OPENAI_API_KEY not found in environment")
-    sys.exit(1)
-
 anthropic_client = Anthropic(api_key=ANTHROPIC_API_KEY)
-openai_client = OpenAI(api_key=OPENAI_API_KEY)
 
-# Initialize ChromaDB
-script_dir = Path(__file__).parent
-project_root = script_dir.parent
-chroma_db_dir = project_root / "chroma_db"
+# Shared 384-dim embedding model — used for Pinecone query vectors and ChromaDB fallback
+print("Loading embedding model: all-MiniLM-L6-v2")
+embed_model = SentenceTransformer("all-MiniLM-L6-v2")
+print("✓ Embedding model loaded")
 
-if not chroma_db_dir.exists():
-    print(f"✗ Error: ChromaDB directory not found: {chroma_db_dir}")
-    print(f"  Run chunker_embedder.py first")
-    sys.exit(1)
-
-chroma_client = chromadb.PersistentClient(
-    path=str(chroma_db_dir),
-    settings=Settings(anonymized_telemetry=False)
-)
-
-try:
-    collection_name = PersonaManager.get_collection_name(persona_config)
-    collection = chroma_client.get_collection(collection_name)
-    print(f"✓ Loaded ChromaDB collection '{collection_name}' with {collection.count()} chunks")
-except Exception as e:
-    print(f"✗ Error loading ChromaDB collection: {e}")
-    sys.exit(1)
-
-# Load discourse collection if available (optional)
+# Vector store: Pinecone when PINECONE_API_KEY is set, else ChromaDB at ~/.chroma/museum/
+pinecone_index = None
+collection = None
 discourse_collection = None
-try:
-    discourse_collection_name = PersonaManager.get_discourse_collection_name(persona_config)
-    discourse_collection = chroma_client.get_collection(discourse_collection_name)
-    print(f"✓ Loaded discourse collection '{discourse_collection_name}' with {discourse_collection.count()} chunks")
-except Exception:
-    print(f"  No discourse collection found (optional — run chunker_embedder.py --discourse to create)")
+
+if USE_PINECONE:
+    from pinecone import Pinecone as _PineconeClient
+    _pc = _PineconeClient(api_key=PINECONE_API_KEY)
+    if PINECONE_HOST:
+        pinecone_index = _pc.Index(host=PINECONE_HOST)
+    else:
+        pinecone_index = _pc.Index(os.getenv("PINECONE_INDEX", "museum-corpus"))
+    print(f"✓ Connected to Pinecone (persona filter: {PERSONA_ID})")
+else:
+    print("PINECONE_API_KEY not set — using ChromaDB fallback")
+    _chroma_path = Path.home() / ".chroma" / "museum"
+    _chroma_client = chromadb.PersistentClient(
+        path=str(_chroma_path),
+        settings=Settings(anonymized_telemetry=False),
+    )
+    try:
+        _col_name = PersonaManager.get_collection_name(persona_config)
+        collection = _chroma_client.get_collection(_col_name)
+        print(f"✓ ChromaDB collection '{_col_name}' ({collection.count()} chunks)")
+    except Exception as e:
+        print(f"✗ Error loading ChromaDB collection: {e}")
+        sys.exit(1)
+    try:
+        _disc_name = PersonaManager.get_discourse_collection_name(persona_config)
+        discourse_collection = _chroma_client.get_collection(_disc_name)
+        print(f"✓ Discourse collection '{_disc_name}' loaded")
+    except Exception:
+        print("  No discourse collection found (optional)")
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -133,41 +137,55 @@ class ChatResponse(BaseModel):
 
 # Helper functions
 def retrieve_relevant_chunks(query: str, n_results: int = 5) -> List[Dict]:
-    """Retrieve relevant chunks from corpus and discourse collections."""
-    # Generate query embedding using OpenAI
-    response = openai_client.embeddings.create(
-        model="text-embedding-3-small",
-        input=query
-    )
-    query_embedding = response.data[0].embedding
-
+    """Retrieve relevant chunks using Pinecone (primary) or ChromaDB (fallback)."""
+    query_vector = embed_model.encode(query, convert_to_numpy=True).tolist()
     chunks = []
 
-    # Query corpus collection (own words)
-    results = collection.query(
-        query_embeddings=[query_embedding],
-        n_results=n_results
-    )
-    if results and results['documents']:
-        for i in range(len(results['documents'][0])):
+    if USE_PINECONE:
+        results = pinecone_index.query(
+            vector=query_vector,
+            top_k=n_results,
+            filter={"persona_id": {"$eq": PERSONA_ID}},
+            include_metadata=True,
+            namespace="",
+        )
+        for match in results.matches:
+            m = match.metadata or {}
             chunks.append({
-                'text': results['documents'][0][i],
-                'metadata': results['metadatas'][0][i],
-                'knowledge_type': 'own words'
+                "text": m.get("text", ""),
+                "metadata": {
+                    "title": m.get("title", ""),
+                    "source": m.get("source", ""),
+                    "year": m.get("year", ""),
+                },
+                "knowledge_type": "own words",
+            })
+        return chunks
+
+    # ChromaDB fallback
+    corpus_results = collection.query(
+        query_embeddings=[query_vector],
+        n_results=n_results,
+    )
+    if corpus_results and corpus_results["documents"]:
+        for i in range(len(corpus_results["documents"][0])):
+            chunks.append({
+                "text": corpus_results["documents"][0][i],
+                "metadata": corpus_results["metadatas"][0][i],
+                "knowledge_type": "own words",
             })
 
-    # Query discourse collection if available
     if discourse_collection:
-        d_results = discourse_collection.query(
-            query_embeddings=[query_embedding],
-            n_results=3
+        disc_results = discourse_collection.query(
+            query_embeddings=[query_vector],
+            n_results=3,
         )
-        if d_results and d_results['documents']:
-            for i in range(len(d_results['documents'][0])):
+        if disc_results and disc_results["documents"]:
+            for i in range(len(disc_results["documents"][0])):
                 chunks.append({
-                    'text': d_results['documents'][0][i],
-                    'metadata': d_results['metadatas'][0][i],
-                    'knowledge_type': 'critical discourse'
+                    "text": disc_results["documents"][0][i],
+                    "metadata": disc_results["metadatas"][0][i],
+                    "knowledge_type": "critical discourse",
                 })
 
     return chunks
@@ -241,8 +259,9 @@ async def root():
     """Health check endpoint."""
     return {
         "status": "ok",
-        "service": "Jane Jacobs Chatbot API",
-        "corpus_chunks": collection.count()
+        "service": f"{persona_config['metadata']['name']} Chatbot API",
+        "vector_store": "pinecone" if USE_PINECONE else "chromadb",
+        "persona": PERSONA_ID,
     }
 
 
@@ -314,13 +333,15 @@ async def clear_conversation(conversation_id: str):
 @app.get("/health")
 async def health():
     """Detailed health check."""
+    store_info = {"type": "pinecone"} if USE_PINECONE else {
+        "type": "chromadb",
+        "chunks": collection.count() if collection else 0,
+    }
     return {
         "status": "healthy",
-        "chromadb": {
-            "connected": True,
-            "chunks": collection.count()
-        },
-        "active_conversations": len(conversations)
+        "vector_store": store_info,
+        "persona": PERSONA_ID,
+        "active_conversations": len(conversations),
     }
 
 
@@ -357,8 +378,8 @@ if __name__ == "__main__":
     host = os.getenv("HOST", "0.0.0.0")
     port = int(os.getenv("PORT", 8000))
 
-    print(f"\nStarting Jane Jacobs Chatbot API server...")
-    print(f"  Corpus chunks: {collection.count()}")
+    print(f"\nStarting {persona_config['metadata']['name']} Chatbot API server...")
+    print(f"  Vector store: {'Pinecone' if USE_PINECONE else 'ChromaDB'}")
     print(f"  Server: http://{host}:{port}")
     print(f"  Docs: http://{host}:{port}/docs")
     print()
