@@ -1,0 +1,74 @@
+{
+  "downloader": "auto",
+  "_comment": "Run: python execution/download_corpus.py --persona adam-smith",
+  "priority_1": [
+    {
+      "title": "An Inquiry into the Nature and Causes of the Wealth of Nations",
+      "author": "Adam Smith",
+      "year": 1776,
+      "source": "gutenberg",
+      "gutenberg_id": 3300,
+      "_comment": "Primary corpus. Full text, clean Gutenberg edition. Includes all five books. Essential."
+    },
+    {
+      "title": "The Theory of Moral Sentiments",
+      "author": "Adam Smith",
+      "year": 1759,
+      "source": "gutenberg",
+      "gutenberg_id": 58559,
+      "_comment": "Primary corpus. The foundational work on sympathy, the impartial spectator, and moral judgment. Must-have — WoN without TMS is half the argument. Gutenberg ID 58559 (6th edition, 1790, Smith's final revision)."
+    }
+  ],
+  "priority_2": [
+    {
+      "title": "Lectures on Jurisprudence",
+      "author": "Adam Smith",
+      "year": 1762,
+      "source": "archive",
+      "search_terms": "Adam Smith lectures jurisprudence Glasgow",
+      "_comment": "Student notes from Smith's Glasgow lectures on jurisprudence, police, revenue, and arms. Two sets of notes survive (1762-63 and 1766). Contains material that was never developed into a published Jurisprudence work — the missing third book Smith planned. Archive.org holds the 1896 Cannan edition."
+    },
+    {
+      "title": "Essays on Philosophical Subjects",
+      "author": "Adam Smith",
+      "year": 1795,
+      "source": "archive",
+      "search_terms": "Adam Smith essays philosophical subjects history astronomy",
+      "_comment": "Published posthumously. Includes the 'History of Astronomy' — Smith's longest surviving philosophical essay — along with essays on ancient physics, ancient logic, and the imitative arts. The History of Astronomy contains the only other well-known 'invisible hand' usage (applied to Jupiter, not markets). Important for understanding his philosophical method."
+    },
+    {
+      "title": "Correspondence of Adam Smith",
+      "author": "Adam Smith",
+      "year": 1977,
+      "source": "archive",
+      "search_terms": "Adam Smith correspondence letters Mossner Ross",
+      "_comment": "The Glasgow Edition of the Works and Correspondence, Vol. VI, edited by Mossner and Ross. Contains letters to and from Hume, Turgot, Burke, and others. Smith burned most of his papers before death — what survives is significant. Search Archive.org for the 1977 Oxford edition or any earlier letter collections."
+    },
+    {
+      "title": "The Wealth of Nations: An Inquiry into the Nature and Causes — Cannan Edition",
+      "author": "Adam Smith",
+      "year": 1904,
+      "source": "archive",
+      "search_terms": "wealth of nations Adam Smith Cannan edition 1904",
+      "_comment": "The Cannan 1904 scholarly edition with notes and index — a supplement to the Gutenberg text, which may lack footnotes. Use if Gutenberg version is insufficiently annotated."
+    }
+  ],
+  "priority_3": [
+    {
+      "title": "Lectures on Rhetoric and Belles Lettres",
+      "author": "Adam Smith",
+      "year": 1762,
+      "source": "archive",
+      "search_terms": "Adam Smith lectures rhetoric belles lettres",
+      "_comment": "Notes from Smith's rhetoric lectures at Glasgow. Less central to political economy but reveals his theory of language, communication, and how ideas are persuasively transmitted — relevant to his analysis of how merchants construct narratives that serve their interests."
+    },
+    {
+      "title": "A Letter to the Authors of the Edinburgh Review",
+      "author": "Adam Smith",
+      "year": 1756,
+      "source": "archive",
+      "search_terms": "Adam Smith letter Edinburgh Review 1756",
+      "_comment": "Smith's early essay comparing English and French philosophy. Short but useful for establishing his critical method and his positioning within European Enlightenment debates."
+    }
+  ]
+}

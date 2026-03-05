@@ -41,6 +41,9 @@ SUPPORTED_PERSONAS = [
     "thomas-jefferson",
     "carl-jung",
     "jane-jacobs",
+    "hl-mencken",
+    "john-taylor-of-caroline",
+    "adam-smith",
 ]
 
 # Files to skip during ingestion (exact filename match within cleaned/ dir)
