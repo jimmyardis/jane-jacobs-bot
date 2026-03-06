@@ -257,6 +257,7 @@
     line-height: 1.7;
     font-size: 14px;
     font-family: var(--persona-font-primary);
+    white-space: pre-wrap;
 }
 
 .jj-message-user .jj-message-content {

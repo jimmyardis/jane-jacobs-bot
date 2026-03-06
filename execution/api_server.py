@@ -245,7 +245,7 @@ def generate_response(user_message: str, conversation_history: List[Dict], conte
     # Call Claude API
     response = anthropic_client.messages.create(
         model="claude-sonnet-4-20250514",
-        max_tokens=1024,
+        max_tokens=2048,
         system=SYSTEM_PROMPT,
         messages=messages
     )
