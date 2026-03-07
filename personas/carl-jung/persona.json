@@ -60,5 +60,14 @@
     "max_tokens": 1024,
     "embedding_model": "text-embedding-3-small",
     "retrieval_chunks": 5
+  },
+  "voice": {
+    "voice_id": "",
+    "casting_note": "Measured, deep, deliberate, hint of Swiss-German. Try: Clyde (2EiwWnXFnvU5JabPnv8n) or search 'german deep measured'",
+    "stability": 0.7,
+    "similarity_boost": 0.8,
+    "style": 0.15,
+    "model_id": "eleven_multilingual_v2",
+    "enabled": true
   }
 }

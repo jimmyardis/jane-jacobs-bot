@@ -111,5 +111,14 @@
       "search_terms": "works of john adams little brown charles francis adams",
       "_note": "Adams wrote devastating critiques of Hamilton's character and ambitions. Embed in discourse collection."
     }
-  ]
+  ],
+  "voice": {
+    "voice_id": "",
+    "casting_note": "Urgent, combative, clipped, Caribbean-to-New-York. Try: Harry (SOYHLrjzK2X1ezoPC6cr) or search 'intense young american male'",
+    "stability": 0.35,
+    "similarity_boost": 0.8,
+    "style": 0.45,
+    "model_id": "eleven_multilingual_v2",
+    "enabled": true
+  }
 }

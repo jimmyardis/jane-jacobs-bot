@@ -64,5 +64,14 @@
     "retrieval_chunks": 5
   },
   "context_sources": [],
-  "discourse_sources": []
+  "discourse_sources": [],
+  "voice": {
+    "voice_id": "",
+    "casting_note": "Wry, Baltimore, slightly nasal, dry. Try: Sam (yoZ06aMxZJJ28mfd3POQ) or search 'dry wry american male'",
+    "stability": 0.55,
+    "similarity_boost": 0.7,
+    "style": 0.3,
+    "model_id": "eleven_multilingual_v2",
+    "enabled": true
+  }
 }

@@ -87,5 +87,14 @@
       "search_terms": "Jefferson memoir correspondence miscellanies",
       "_comment": "Jefferson-Taylor correspondence is among the most substantive political dialogue in the Virginia republican tradition. Jefferson's corpus already contains the Memoir volumes — add here only if Taylor-specific letters can be isolated."
     }
-  ]
+  ],
+  "voice": {
+    "voice_id": "",
+    "casting_note": "Slow, Virginia, grave, plain-spoken. Try: Adam (pNInz6obpgDQGcFmaJgB) or search 'deep southern grave'",
+    "stability": 0.75,
+    "similarity_boost": 0.75,
+    "style": 0.1,
+    "model_id": "eleven_multilingual_v2",
+    "enabled": true
+  }
 }

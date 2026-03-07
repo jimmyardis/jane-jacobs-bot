@@ -58,5 +58,14 @@
     "max_tokens": 1024,
     "embedding_model": "text-embedding-3-small",
     "retrieval_chunks": 5
+  },
+  "voice": {
+    "voice_id": "",
+    "casting_note": "Sharp, direct, New York. Try: Domi (AZnzlk1XvdvUeBnXmlld) or search 'new york female direct'",
+    "stability": 0.45,
+    "similarity_boost": 0.75,
+    "style": 0.35,
+    "model_id": "eleven_multilingual_v2",
+    "enabled": true
   }
 }
