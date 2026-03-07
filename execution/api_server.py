@@ -15,7 +15,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import chromadb
 from chromadb.config import Settings
-from anthropic import Anthropic
+import asyncio
+from anthropic import AsyncAnthropic
 from sentence_transformers import SentenceTransformer
 
 from persona_manager import PersonaManager
@@ -44,7 +45,7 @@ if not ANTHROPIC_API_KEY:
     print("✗ Error: ANTHROPIC_API_KEY not found in environment")
     sys.exit(1)
 
-anthropic_client = Anthropic(api_key=ANTHROPIC_API_KEY)
+anthropic_client = AsyncAnthropic(api_key=ANTHROPIC_API_KEY)
 
 # Shared 384-dim embedding model — used for Pinecone query vectors and ChromaDB fallback
 print("Loading embedding model: all-MiniLM-L6-v2")
@@ -222,7 +223,7 @@ def build_context(chunks: List[Dict]) -> str:
     return '\n'.join(context_parts)
 
 
-def generate_response(user_message: str, conversation_history: List[Dict], context: str) -> str:
+async def generate_response(user_message: str, conversation_history: List[Dict], context: str) -> str:
     """Generate response using Claude with RAG context."""
 
     # Build messages for Claude
@@ -243,7 +244,7 @@ def generate_response(user_message: str, conversation_history: List[Dict], conte
     })
 
     # Call Claude API
-    response = anthropic_client.messages.create(
+    response = await anthropic_client.messages.create(
         model="claude-sonnet-4-20250514",
         max_tokens=2048,
         system=SYSTEM_PROMPT,
@@ -283,7 +284,7 @@ async def chat(request: ChatRequest):
         context = build_context(chunks)
 
         # Generate response
-        response_text = generate_response(
+        response_text = await generate_response(
             request.message,
             conversation_history,
             context
@@ -419,7 +420,7 @@ def retrieve_chunks_for_debate(query: str, persona_id: str, n: int = 4) -> List[
     ]
 
 
-def generate_debate_turn(
+async def generate_debate_turn(
     persona_config: Dict,
     opponent_config: Dict,
     topic: str,
@@ -476,7 +477,7 @@ def generate_debate_turn(
     if messages[0]['role'] == 'assistant':
         messages.insert(0, {"role": "user", "content": f"Begin the debate on: {topic}"})
 
-    resp = anthropic_client.messages.create(
+    resp = await anthropic_client.messages.create(
         model="claude-sonnet-4-20250514",
         max_tokens=1024,
         system=system_prompt,
@@ -487,7 +488,7 @@ def generate_debate_turn(
 
 @app.post("/debate", response_model=DebateResponse)
 async def debate(request: DebateRequest):
-    """Run one exchange of a two-persona debate."""
+    """Run one exchange of a two-persona debate. Both turns generated in parallel."""
     try:
         config_a = PersonaManager.load_persona(request.persona_a)
         config_b = PersonaManager.load_persona(request.persona_b)
@@ -498,28 +499,34 @@ async def debate(request: DebateRequest):
     if request.history:
         query += " " + " ".join(t.text[:100] for t in request.history[-2:])
 
-    chunks_a = retrieve_chunks_for_debate(query, request.persona_a)
-    chunks_b = retrieve_chunks_for_debate(query, request.persona_b)
+    # Retrieve corpus chunks for both personas in parallel
+    chunks_a, chunks_b = await asyncio.gather(
+        asyncio.get_running_loop().run_in_executor(
+            None, retrieve_chunks_for_debate, query, request.persona_a),
+        asyncio.get_running_loop().run_in_executor(
+            None, retrieve_chunks_for_debate, query, request.persona_b),
+    )
+
     history_dicts = [t.model_dump() for t in request.history]
 
+    # Each persona responds to the opponent's LAST turn from history (independent → parallel).
+    # Round 1: both give opening arguments (no prior text).
     last_b_text = next(
-        (t['text'] for t in reversed(history_dicts) if t['speaker'] == request.persona_b),
-        None
+        (t['text'] for t in reversed(history_dicts) if t['speaker'] == request.persona_b), None
+    )
+    last_a_text = next(
+        (t['text'] for t in reversed(history_dicts) if t['speaker'] == request.persona_a), None
     )
 
     try:
-        text_a = generate_debate_turn(config_a, config_b, request.topic, history_dicts,
-                                      last_b_text, request.moderator_note, chunks_a)
+        text_a, text_b = await asyncio.gather(
+            generate_debate_turn(config_a, config_b, request.topic, history_dicts,
+                                 last_b_text, request.moderator_note, chunks_a),
+            generate_debate_turn(config_b, config_a, request.topic, history_dicts,
+                                 last_a_text, request.moderator_note, chunks_b),
+        )
     except Exception as e:
-        raise HTTPException(status_code=500,
-                            detail=f"Error generating {config_a['metadata']['name']} response: {e}")
-
-    try:
-        text_b = generate_debate_turn(config_b, config_a, request.topic, history_dicts,
-                                      text_a, request.moderator_note, chunks_b)
-    except Exception as e:
-        raise HTTPException(status_code=500,
-                            detail=f"Error generating {config_b['metadata']['name']} response: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
     return DebateResponse(exchange=[
         DebateTurn(speaker=request.persona_a, display_name=config_a['metadata']['name'], text=text_a),
