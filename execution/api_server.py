@@ -384,20 +384,22 @@ async def list_personas():
 
 # ── Debate ───────────────────────────────────────────────────────────────────
 
-class DebateTurn(BaseModel):
-    speaker: str
-    display_name: str
-    text: str
+class DebateHistoryEntry(BaseModel):
+    exchange: int
+    figure_a: str
+    figure_b: str
 
 class DebateRequest(BaseModel):
     persona_a: str
     persona_b: str
     topic: str
-    history: List[DebateTurn] = []
-    moderator_note: Optional[str] = None
+    history: List[DebateHistoryEntry] = []
+    steer: Optional[str] = None
+    exchange_num: Optional[int] = None
 
 class DebateResponse(BaseModel):
-    exchange: List[DebateTurn]
+    response_a: str
+    response_b: str
 
 
 def retrieve_chunks_for_debate(query: str, persona_id: str, n: int = 4) -> List[Dict]:
@@ -424,9 +426,9 @@ async def generate_debate_turn(
     persona_config: Dict,
     opponent_config: Dict,
     topic: str,
-    history: List[Dict],
-    new_opponent_text: Optional[str],
-    moderator_note: Optional[str],
+    history: List[DebateHistoryEntry],
+    is_figure_a: bool,
+    steer: Optional[str],
     corpus_chunks: List[Dict],
 ) -> str:
     """Generate one debate response for a persona."""
@@ -451,31 +453,36 @@ async def generate_debate_turn(
     else:
         context_str = ""
 
-    # Build message history: this persona = assistant, opponent = user
-    my_id = persona_config['id']
+    # Build message history from {figure_a, figure_b} entries.
+    # For figure A: figure_a = assistant, figure_b = user (opponent).
+    # For figure B: figure_b = assistant, figure_a = user (opponent).
     messages = []
-    for turn in history:
-        if turn['speaker'] == my_id:
-            messages.append({"role": "assistant", "content": turn['text']})
-        else:
-            messages.append({"role": "user", "content": f"{turn['display_name']}: {turn['text']}"})
+    for entry in history:
+        my_text  = entry.figure_a if is_figure_a else entry.figure_b
+        opp_text = entry.figure_b if is_figure_a else entry.figure_a
+        messages.append({"role": "user",      "content": f"{opponent_name}: {opp_text}"})
+        messages.append({"role": "assistant", "content": my_text})
 
-    if new_opponent_text:
-        prompt = f"{context_str}{opponent_name} argues: {new_opponent_text}"
-        if moderator_note:
-            prompt += f"\n\nModerator: {moderator_note}"
+    # Each persona responds to the opponent's last statement (or gives opening if no history).
+    last_opponent_text = (
+        (history[-1].figure_b if is_figure_a else history[-1].figure_a)
+        if history else None
+    )
+
+    if last_opponent_text:
+        prompt = f"{context_str}{opponent_name} argues: {last_opponent_text}"
+        if steer:
+            prompt += f"\n\nModerator: {steer}"
         prompt += f"\n\nRespond to {opponent_name}'s argument."
     else:
         prompt = f"{context_str}Topic: {topic}"
-        if moderator_note:
-            prompt += f"\n\nModerator: {moderator_note}"
+        if steer:
+            prompt += f"\n\nModerator: {steer}"
         prompt += f"\n\nGive your opening argument, addressing {opponent_name}."
 
     messages.append({"role": "user", "content": prompt})
 
-    # Claude requires messages to start with 'user'
-    if messages[0]['role'] == 'assistant':
-        messages.insert(0, {"role": "user", "content": f"Begin the debate on: {topic}"})
+    # Claude requires messages to start with 'user' — already guaranteed above.
 
     resp = await anthropic_client.messages.create(
         model="claude-sonnet-4-20250514",
@@ -497,7 +504,8 @@ async def debate(request: DebateRequest):
 
     query = request.topic
     if request.history:
-        query += " " + " ".join(t.text[:100] for t in request.history[-2:])
+        last = request.history[-1]
+        query += f" {last.figure_a[:100]} {last.figure_b[:100]}"
 
     # Retrieve corpus chunks for both personas in parallel
     chunks_a, chunks_b = await asyncio.gather(
@@ -507,31 +515,17 @@ async def debate(request: DebateRequest):
             None, retrieve_chunks_for_debate, query, request.persona_b),
     )
 
-    history_dicts = [t.model_dump() for t in request.history]
-
-    # Each persona responds to the opponent's LAST turn from history (independent → parallel).
-    # Round 1: both give opening arguments (no prior text).
-    last_b_text = next(
-        (t['text'] for t in reversed(history_dicts) if t['speaker'] == request.persona_b), None
-    )
-    last_a_text = next(
-        (t['text'] for t in reversed(history_dicts) if t['speaker'] == request.persona_a), None
-    )
-
     try:
         text_a, text_b = await asyncio.gather(
-            generate_debate_turn(config_a, config_b, request.topic, history_dicts,
-                                 last_b_text, request.moderator_note, chunks_a),
-            generate_debate_turn(config_b, config_a, request.topic, history_dicts,
-                                 last_a_text, request.moderator_note, chunks_b),
+            generate_debate_turn(config_a, config_b, request.topic, request.history,
+                                 True, request.steer, chunks_a),
+            generate_debate_turn(config_b, config_a, request.topic, request.history,
+                                 False, request.steer, chunks_b),
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-    return DebateResponse(exchange=[
-        DebateTurn(speaker=request.persona_a, display_name=config_a['metadata']['name'], text=text_a),
-        DebateTurn(speaker=request.persona_b, display_name=config_b['metadata']['name'], text=text_b),
-    ])
+    return DebateResponse(response_a=text_a, response_b=text_b)
 
 
 if __name__ == "__main__":
