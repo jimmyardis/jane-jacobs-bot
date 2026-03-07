@@ -366,10 +366,165 @@ async def get_persona_config(persona_id: str):
 
 @app.get("/personas")
 async def list_personas():
-    """List all available personas."""
-    return {
-        "personas": PersonaManager.list_available_personas()
-    }
+    """List all available personas with display info for the debate UI."""
+    persona_ids = PersonaManager.list_available_personas()
+    personas = []
+    for pid in persona_ids:
+        try:
+            config = PersonaManager.load_persona(pid)
+            m = config['metadata']
+            death = m.get('death_year')
+            years = f"{m['birth_year']} \u2013 {death}" if death else f"b. {m['birth_year']}"
+            personas.append({"id": pid, "display_name": m['name'], "years": years})
+        except Exception:
+            pass
+    return {"personas": personas}
+
+
+# ── Debate ───────────────────────────────────────────────────────────────────
+
+class DebateTurn(BaseModel):
+    speaker: str
+    display_name: str
+    text: str
+
+class DebateRequest(BaseModel):
+    persona_a: str
+    persona_b: str
+    topic: str
+    history: List[DebateTurn] = []
+    moderator_note: Optional[str] = None
+
+class DebateResponse(BaseModel):
+    exchange: List[DebateTurn]
+
+
+def retrieve_chunks_for_debate(query: str, persona_id: str, n: int = 4) -> List[Dict]:
+    """Retrieve corpus chunks for a specific persona for debate context."""
+    query_vector = embed_model.encode(query, convert_to_numpy=True).tolist()
+    if not USE_PINECONE:
+        return []
+    results = pinecone_index.query(
+        vector=query_vector,
+        top_k=n,
+        filter={"persona_id": {"$eq": persona_id}},
+        include_metadata=True,
+        namespace="",
+    )
+    return [
+        {"text": (m := match.metadata or {}).get("text", ""),
+         "title": m.get("title", ""),
+         "year": m.get("year", "")}
+        for match in results.matches
+    ]
+
+
+def generate_debate_turn(
+    persona_config: Dict,
+    opponent_config: Dict,
+    topic: str,
+    history: List[Dict],
+    new_opponent_text: Optional[str],
+    moderator_note: Optional[str],
+    corpus_chunks: List[Dict],
+) -> str:
+    """Generate one debate response for a persona."""
+    persona_name = persona_config['metadata']['name']
+    opponent_name = opponent_config['metadata']['name']
+
+    system_prompt = PersonaManager.build_system_prompt(persona_config)
+    system_prompt += (
+        f"\n\nYou are engaged in a formal debate with {opponent_name} on: \"{topic}\". "
+        "Respond with the directness and conviction of your actual views. "
+        "Keep your response to 2\u20133 focused paragraphs."
+    )
+
+    if corpus_chunks:
+        ctx_lines = ["Relevant passages from your own writings:\n"]
+        for c in corpus_chunks:
+            label = c.get('title', '')
+            if c.get('year'):
+                label += f", {c['year']}"
+            ctx_lines.append(f"\u2014 {label}:\n{c['text']}\n")
+        context_str = "\n".join(ctx_lines) + "\n---\n"
+    else:
+        context_str = ""
+
+    # Build message history: this persona = assistant, opponent = user
+    my_id = persona_config['id']
+    messages = []
+    for turn in history:
+        if turn['speaker'] == my_id:
+            messages.append({"role": "assistant", "content": turn['text']})
+        else:
+            messages.append({"role": "user", "content": f"{turn['display_name']}: {turn['text']}"})
+
+    if new_opponent_text:
+        prompt = f"{context_str}{opponent_name} argues: {new_opponent_text}"
+        if moderator_note:
+            prompt += f"\n\nModerator: {moderator_note}"
+        prompt += f"\n\nRespond to {opponent_name}'s argument."
+    else:
+        prompt = f"{context_str}Topic: {topic}"
+        if moderator_note:
+            prompt += f"\n\nModerator: {moderator_note}"
+        prompt += f"\n\nGive your opening argument, addressing {opponent_name}."
+
+    messages.append({"role": "user", "content": prompt})
+
+    # Claude requires messages to start with 'user'
+    if messages[0]['role'] == 'assistant':
+        messages.insert(0, {"role": "user", "content": f"Begin the debate on: {topic}"})
+
+    resp = anthropic_client.messages.create(
+        model="claude-sonnet-4-20250514",
+        max_tokens=1024,
+        system=system_prompt,
+        messages=messages,
+    )
+    return resp.content[0].text
+
+
+@app.post("/debate", response_model=DebateResponse)
+async def debate(request: DebateRequest):
+    """Run one exchange of a two-persona debate."""
+    try:
+        config_a = PersonaManager.load_persona(request.persona_a)
+        config_b = PersonaManager.load_persona(request.persona_b)
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+    query = request.topic
+    if request.history:
+        query += " " + " ".join(t.text[:100] for t in request.history[-2:])
+
+    chunks_a = retrieve_chunks_for_debate(query, request.persona_a)
+    chunks_b = retrieve_chunks_for_debate(query, request.persona_b)
+    history_dicts = [t.model_dump() for t in request.history]
+
+    last_b_text = next(
+        (t['text'] for t in reversed(history_dicts) if t['speaker'] == request.persona_b),
+        None
+    )
+
+    try:
+        text_a = generate_debate_turn(config_a, config_b, request.topic, history_dicts,
+                                      last_b_text, request.moderator_note, chunks_a)
+    except Exception as e:
+        raise HTTPException(status_code=500,
+                            detail=f"Error generating {config_a['metadata']['name']} response: {e}")
+
+    try:
+        text_b = generate_debate_turn(config_b, config_a, request.topic, history_dicts,
+                                      text_a, request.moderator_note, chunks_b)
+    except Exception as e:
+        raise HTTPException(status_code=500,
+                            detail=f"Error generating {config_b['metadata']['name']} response: {e}")
+
+    return DebateResponse(exchange=[
+        DebateTurn(speaker=request.persona_a, display_name=config_a['metadata']['name'], text=text_a),
+        DebateTurn(speaker=request.persona_b, display_name=config_b['metadata']['name'], text=text_b),
+    ])
 
 
 if __name__ == "__main__":
