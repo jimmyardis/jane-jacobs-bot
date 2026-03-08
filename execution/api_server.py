@@ -51,6 +51,7 @@ anthropic_client = AsyncAnthropic(api_key=ANTHROPIC_API_KEY)
 
 ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY")
 ELEVENLABS_BASE = "https://api.elevenlabs.io/v1"
+print(f"{'✓' if ELEVENLABS_API_KEY else '✗'} ELEVENLABS_API_KEY {'set' if ELEVENLABS_API_KEY else 'NOT SET — voice will be silent'}")
 
 # Shared 384-dim embedding model — used for Pinecone query vectors and ChromaDB fallback
 print("Loading embedding model: all-MiniLM-L6-v2")
