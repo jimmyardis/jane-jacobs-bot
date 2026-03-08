@@ -157,27 +157,33 @@ async def text_to_speech(text: str, voice_config: dict) -> Optional[bytes]:
     if not voice_id or not ELEVENLABS_API_KEY:
         print(f"TTS skipped: voice_id={repr(voice_id)}, key_set={bool(ELEVENLABS_API_KEY)}")
         return None
-    async with httpx.AsyncClient() as client:
-        resp = await client.post(
-            f"{ELEVENLABS_BASE}/text-to-speech/{voice_id}",
-            headers={"xi-api-key": ELEVENLABS_API_KEY},
-            json={
-                "text": text,
-                "model_id": voice_config.get("model_id", "eleven_multilingual_v2"),
-                "voice_settings": {
-                    "stability": voice_config.get("stability", 0.5),
-                    "similarity_boost": voice_config.get("similarity_boost", 0.75),
-                    "style": voice_config.get("style", 0.3),
-                    "use_speaker_boost": True,
+    # Truncate to ~800 chars to keep TTS fast and credits reasonable
+    tts_text = text[:800].rsplit(' ', 1)[0] if len(text) > 800 else text
+    try:
+        async with httpx.AsyncClient() as client:
+            resp = await client.post(
+                f"{ELEVENLABS_BASE}/text-to-speech/{voice_id}",
+                headers={"xi-api-key": ELEVENLABS_API_KEY},
+                json={
+                    "text": tts_text,
+                    "model_id": voice_config.get("model_id", "eleven_multilingual_v2"),
+                    "voice_settings": {
+                        "stability": voice_config.get("stability", 0.5),
+                        "similarity_boost": voice_config.get("similarity_boost", 0.75),
+                        "style": voice_config.get("style", 0.3),
+                        "use_speaker_boost": True,
+                    },
                 },
-            },
-            timeout=30.0,
-        )
-        if resp.status_code != 200:
-            print(f"TTS error {resp.status_code}: {resp.text[:300]}")
-            return None
-        print(f"TTS ok: {len(resp.content)} bytes for voice {voice_id}")
-        return resp.content
+                timeout=60.0,
+            )
+            if resp.status_code != 200:
+                print(f"TTS error {resp.status_code}: {resp.text[:300]}")
+                return None
+            print(f"TTS ok: {len(resp.content)} bytes for voice {voice_id}")
+            return resp.content
+    except Exception as e:
+        print(f"TTS exception: {e}")
+        return None
 
 
 def retrieve_relevant_chunks(query: str, n_results: int = 5) -> List[Dict]:
