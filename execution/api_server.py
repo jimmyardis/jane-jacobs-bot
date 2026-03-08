@@ -477,6 +477,12 @@ class DebateResponse(BaseModel):
     response_a: str
     response_b: str
 
+class DebateVoiceResponse(BaseModel):
+    response_a: str
+    response_b: str
+    audio_a: Optional[str] = None
+    audio_b: Optional[str] = None
+
 
 def retrieve_chunks_for_debate(query: str, persona_id: str, n: int = 4) -> List[Dict]:
     """Retrieve corpus chunks for a specific persona for debate context."""
@@ -569,9 +575,8 @@ async def generate_debate_turn(
     return resp.content[0].text
 
 
-@app.post("/debate", response_model=DebateResponse)
-async def debate(request: DebateRequest):
-    """Run one exchange of a two-persona debate. Both turns generated in parallel."""
+async def _run_debate(request: DebateRequest):
+    """Shared logic: load personas, retrieve chunks, generate both turns. Returns (config_a, config_b, text_a, text_b)."""
     try:
         config_a = PersonaManager.load_persona(request.persona_a)
         config_b = PersonaManager.load_persona(request.persona_b)
@@ -583,7 +588,6 @@ async def debate(request: DebateRequest):
         last = request.history[-1]
         query += f" {last.figure_a[:100]} {last.figure_b[:100]}"
 
-    # Retrieve corpus chunks for both personas in parallel
     chunks_a, chunks_b = await asyncio.gather(
         asyncio.get_running_loop().run_in_executor(
             None, retrieve_chunks_for_debate, query, request.persona_a),
@@ -601,7 +605,32 @@ async def debate(request: DebateRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+    return config_a, config_b, text_a, text_b
+
+
+@app.post("/debate", response_model=DebateResponse)
+async def debate(request: DebateRequest):
+    """Run one exchange of a two-persona debate."""
+    _, _, text_a, text_b = await _run_debate(request)
     return DebateResponse(response_a=text_a, response_b=text_b)
+
+
+@app.post("/debate/voice", response_model=DebateVoiceResponse)
+async def debate_voice(request: DebateRequest):
+    """Same as /debate but also returns ElevenLabs TTS audio for both speakers."""
+    config_a, config_b, text_a, text_b = await _run_debate(request)
+
+    audio_a_bytes, audio_b_bytes = await asyncio.gather(
+        text_to_speech(text_a, config_a.get("voice", {})),
+        text_to_speech(text_b, config_b.get("voice", {})),
+    )
+
+    return DebateVoiceResponse(
+        response_a=text_a,
+        response_b=text_b,
+        audio_a=base64.b64encode(audio_a_bytes).decode() if audio_a_bytes else None,
+        audio_b=base64.b64encode(audio_b_bytes).decode() if audio_b_bytes else None,
+    )
 
 
 if __name__ == "__main__":
