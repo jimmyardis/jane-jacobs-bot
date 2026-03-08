@@ -20,6 +20,7 @@
     let isOpen = false;
     let isTyping = false;
     let personaConfig = null;
+    let voiceEnabled = false;
 
     // Load persona configuration and initialize widget
     async function init() {
@@ -135,6 +136,13 @@
                 </div>
 
                 <div class="jj-input-container">
+                    <button id="jj-voice" class="jj-voice-btn" title="Enable voice" aria-label="Toggle voice output">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+                            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                        </svg>
+                    </button>
                     <input
                         type="text"
                         id="jj-input"
@@ -163,9 +171,12 @@
         const sendBtn = document.getElementById('jj-send');
         const input = document.getElementById('jj-input');
 
+        const voiceBtn = document.getElementById('jj-voice');
+
         trigger.addEventListener('click', toggleChat);
         closeBtn.addEventListener('click', closeChat);
         sendBtn.addEventListener('click', sendMessage);
+        voiceBtn.addEventListener('click', toggleVoice);
         input.addEventListener('keypress', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
@@ -228,6 +239,20 @@
         }
     }
 
+    // Toggle voice output on/off for this session
+    function toggleVoice() {
+        voiceEnabled = !voiceEnabled;
+        const btn = document.getElementById('jj-voice');
+        btn.classList.toggle('jj-voice-active', voiceEnabled);
+        btn.title = voiceEnabled ? 'Voice on — click to mute' : 'Enable voice';
+    }
+
+    // Play base64-encoded MP3 audio
+    function playAudio(base64) {
+        const audio = new Audio(`data:audio/mpeg;base64,${base64}`);
+        audio.play().catch(err => console.warn('Audio playback blocked:', err));
+    }
+
     // Send message (from input)
     function sendMessage() {
         const input = document.getElementById('jj-input');
@@ -270,7 +295,8 @@
         showTypingIndicator();
 
         try {
-            const response = await fetch(`${API_URL}/chat`, {
+            const endpoint = voiceEnabled ? '/chat/voice' : '/chat';
+            const response = await fetch(`${API_URL}${endpoint}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -289,6 +315,11 @@
             // Add assistant response with typewriter effect
             removeTypingIndicator();
             addMessage('assistant', data.response, true);
+
+            // Play audio if voice is enabled and API returned it
+            if (voiceEnabled && data.audio_base64) {
+                playAudio(data.audio_base64);
+            }
 
         } catch (error) {
             console.error('Error sending message:', error);

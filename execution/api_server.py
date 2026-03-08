@@ -6,6 +6,7 @@ RAG-powered API with Claude Sonnet for persona responses.
 
 import os
 import sys
+import base64
 from pathlib import Path
 from typing import List, Dict, Optional
 from dotenv import load_dotenv
@@ -16,6 +17,7 @@ from pydantic import BaseModel
 import chromadb
 from chromadb.config import Settings
 import asyncio
+import httpx
 from anthropic import AsyncAnthropic
 from sentence_transformers import SentenceTransformer
 
@@ -46,6 +48,9 @@ if not ANTHROPIC_API_KEY:
     sys.exit(1)
 
 anthropic_client = AsyncAnthropic(api_key=ANTHROPIC_API_KEY)
+
+ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY")
+ELEVENLABS_BASE = "https://api.elevenlabs.io/v1"
 
 # Shared 384-dim embedding model — used for Pinecone query vectors and ChromaDB fallback
 print("Loading embedding model: all-MiniLM-L6-v2")
@@ -136,7 +141,38 @@ class ChatResponse(BaseModel):
     sources: List[Dict[str, str]]
 
 
+class VoiceChatResponse(BaseModel):
+    response: str
+    conversation_id: str
+    sources: List[Dict[str, str]]
+    audio_base64: Optional[str] = None
+
+
 # Helper functions
+async def text_to_speech(text: str, voice_config: dict) -> Optional[bytes]:
+    """Call ElevenLabs TTS and return MP3 bytes, or None if unavailable."""
+    voice_id = voice_config.get("voice_id", "")
+    if not voice_id or not ELEVENLABS_API_KEY:
+        return None
+    async with httpx.AsyncClient() as client:
+        resp = await client.post(
+            f"{ELEVENLABS_BASE}/text-to-speech/{voice_id}",
+            headers={"xi-api-key": ELEVENLABS_API_KEY},
+            json={
+                "text": text,
+                "model_id": voice_config.get("model_id", "eleven_multilingual_v2"),
+                "voice_settings": {
+                    "stability": voice_config.get("stability", 0.5),
+                    "similarity_boost": voice_config.get("similarity_boost", 0.75),
+                    "style": voice_config.get("style", 0.3),
+                    "use_speaker_boost": True,
+                },
+            },
+            timeout=30.0,
+        )
+        return resp.content if resp.status_code == 200 else None
+
+
 def retrieve_relevant_chunks(query: str, n_results: int = 5) -> List[Dict]:
     """Retrieve relevant chunks using Pinecone (primary) or ChromaDB (fallback)."""
     query_vector = embed_model.encode(query, convert_to_numpy=True).tolist()
@@ -315,6 +351,46 @@ async def chat(request: ChatRequest):
             response=response_text,
             conversation_id=conversation_id,
             sources=sources
+        )
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/chat/voice", response_model=VoiceChatResponse)
+async def chat_voice(request: ChatRequest):
+    """Chat endpoint that also returns ElevenLabs TTS audio as base64 MP3."""
+    conversation_id = request.conversation_id or f"conv_{os.urandom(8).hex()}"
+    if conversation_id not in conversations:
+        conversations[conversation_id] = []
+    conversation_history = conversations[conversation_id]
+
+    try:
+        chunks = retrieve_relevant_chunks(request.message, n_results=5)
+        context = build_context(chunks)
+        response_text = await generate_response(request.message, conversation_history, context)
+
+        conversation_history.append({"role": "user",      "content": request.message})
+        conversation_history.append({"role": "assistant", "content": response_text})
+
+        sources = []
+        for chunk in chunks[:3]:
+            metadata = chunk['metadata']
+            sources.append({
+                "title": metadata.get('title', 'Unknown'),
+                "year": metadata.get('year', 'Unknown'),
+                "knowledge_type": chunk.get('knowledge_type', 'own words'),
+                "preview": chunk['text'][:150] + "..."
+            })
+
+        audio_bytes = await text_to_speech(response_text, persona_config.get("voice", {}))
+        audio_b64 = base64.b64encode(audio_bytes).decode() if audio_bytes else None
+
+        return VoiceChatResponse(
+            response=response_text,
+            conversation_id=conversation_id,
+            sources=sources,
+            audio_base64=audio_b64,
         )
 
     except Exception as e:
