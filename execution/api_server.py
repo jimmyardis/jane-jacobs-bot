@@ -7,6 +7,7 @@ RAG-powered API with Claude Sonnet for persona responses.
 import os
 import sys
 import base64
+import traceback
 from pathlib import Path
 from typing import List, Dict, Optional
 from dotenv import load_dotenv
@@ -360,6 +361,7 @@ async def chat(request: ChatRequest):
         )
 
     except Exception as e:
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -400,6 +402,7 @@ async def chat_voice(request: ChatRequest):
         )
 
     except Exception as e:
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
 
