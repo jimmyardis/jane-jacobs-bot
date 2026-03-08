@@ -154,6 +154,7 @@ async def text_to_speech(text: str, voice_config: dict) -> Optional[bytes]:
     """Call ElevenLabs TTS and return MP3 bytes, or None if unavailable."""
     voice_id = voice_config.get("voice_id", "")
     if not voice_id or not ELEVENLABS_API_KEY:
+        print(f"TTS skipped: voice_id={repr(voice_id)}, key_set={bool(ELEVENLABS_API_KEY)}")
         return None
     async with httpx.AsyncClient() as client:
         resp = await client.post(
@@ -171,7 +172,11 @@ async def text_to_speech(text: str, voice_config: dict) -> Optional[bytes]:
             },
             timeout=30.0,
         )
-        return resp.content if resp.status_code == 200 else None
+        if resp.status_code != 200:
+            print(f"TTS error {resp.status_code}: {resp.text[:300]}")
+            return None
+        print(f"TTS ok: {len(resp.content)} bytes for voice {voice_id}")
+        return resp.content
 
 
 def retrieve_relevant_chunks(query: str, n_results: int = 5) -> List[Dict]:
