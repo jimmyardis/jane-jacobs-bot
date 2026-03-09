@@ -157,15 +157,13 @@ async def text_to_speech(text: str, voice_config: dict) -> Optional[bytes]:
     if not voice_id or not ELEVENLABS_API_KEY:
         print(f"TTS skipped: voice_id={repr(voice_id)}, key_set={bool(ELEVENLABS_API_KEY)}")
         return None
-    # Truncate to ~800 chars to keep TTS fast and credits reasonable
-    tts_text = text[:800].rsplit(' ', 1)[0] if len(text) > 800 else text
     try:
         async with httpx.AsyncClient() as client:
             resp = await client.post(
                 f"{ELEVENLABS_BASE}/text-to-speech/{voice_id}",
                 headers={"xi-api-key": ELEVENLABS_API_KEY},
                 json={
-                    "text": tts_text,
+                    "text": text,
                     "model_id": voice_config.get("model_id", "eleven_multilingual_v2"),
                     "voice_settings": {
                         "stability": voice_config.get("stability", 0.5),
